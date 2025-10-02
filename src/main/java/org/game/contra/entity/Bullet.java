@@ -1,27 +1,35 @@
 package org.game.contra.entity;
 
-public class Bullet extends Entity{
-    private double x, y;
-    private double speedX, speedY;
+import org.game.contra.components.TransformComponent;
+
+public class Bullet extends Entity {
     private boolean fromPlayer;
     private boolean active = true;
     private static final double BULLET_SIZE = 8;
+    private static final double BULLET_SPEED = 10.0;
     
     public Bullet(double x, double y, double speedX, double speedY, boolean fromPlayer) {
-        this.x = x;
-        this.y = y;
-        this.speedX = speedX;
-        this.speedY = speedY;
         this.fromPlayer = fromPlayer;
+        
+        // Create and add transform component
+        TransformComponent transform = new TransformComponent(x, y, BULLET_SIZE, BULLET_SIZE);
+        transform.setVelocityX(speedX);
+        transform.setVelocityY(speedY);
+        addComponent(transform);
     }
     
     public void update() {
-        x += speedX;
-        y += speedY;
-        
-        // Deactivate if off screen
-        if (x < -50 || x > 850 || y < -50 || y > 650) {
-            active = false;
+        TransformComponent transform = getComponent(TransformComponent.class);
+        if (transform != null) {
+            // Update position based on velocity
+            transform.setX(transform.getX() + transform.getVelocityX());
+            transform.setY(transform.getY() + transform.getVelocityY());
+            
+            // Deactivate if off screen
+            if (transform.getX() < -50 || transform.getX() > 850 || 
+                transform.getY() < -50 || transform.getY() > 650) {
+                active = false;
+            }
         }
     }
     
@@ -34,16 +42,24 @@ public class Bullet extends Entity{
     }
     
     // Getters
-    public double getX() { return x; }
-    public double getY() { return y; }
-    public double getSize() { return BULLET_SIZE; }
-    public boolean isFromPlayer() { return fromPlayer; }
+    public double getX() { 
+        TransformComponent transform = getComponent(TransformComponent.class);
+        return transform != null ? transform.getX() : 0; 
+    }
     
-    // Check collision with a rectangle
-    public boolean collidesWith(double x, double y, double width, double height) {
-        return this.x + BULLET_SIZE > x && 
-               this.x < x + width &&
-               this.y + BULLET_SIZE > y && 
-               this.y < y + height;
+    public double getY() { 
+        TransformComponent transform = getComponent(TransformComponent.class);
+        return transform != null ? transform.getY() : 0;
+    }
+    
+    public double getWidth() { return BULLET_SIZE; }
+    public double getHeight() { return BULLET_SIZE; }
+    
+    public boolean isFromPlayer() { 
+        return fromPlayer; 
+    }
+    
+    public TransformComponent getTransform() {
+        return getComponent(TransformComponent.class);
     }
 }

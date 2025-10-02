@@ -33,10 +33,7 @@ public class Player extends Entity {
         addComponent(new ShootingComponent(BULLET_SPEED));
     }
 
-    // Getters for convenience
-    public TransformComponent getTransform() {
-        return getComponent(TransformComponent.class);
-    }
+
 
     public PhysicsComponent getPhysics() {
         return getComponent(PhysicsComponent.class);

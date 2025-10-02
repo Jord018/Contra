@@ -3,6 +3,7 @@ package org.game.contra.core;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;
 import org.game.contra.core.Game_Manager;
+import org.game.contra.entity.Bullet;
 import org.game.contra.entity.Entity;
 import org.game.contra.systems.RenderSystem;
 
@@ -45,23 +46,30 @@ public class GameLoop extends AnimationTimer {
         boolean left = inputHandler.isMoveLeft();
         boolean right = inputHandler.isMoveRight();
         boolean jump = inputHandler.isJump();
+        boolean attack = inputHandler.isShoot();
         
-        // Update game state
-        updateGameState(left, right, jump);
+        // Update game state with current input
+        updateGameState(left, right, jump, attack);
         
-        // Render all entities
+        // Clear the screen
         renderSystem.clear();
+        
+        // Render all active entities
         for (Entity entity : gameManager.getEntities()) {
+            // Skip rendering inactive bullets
+            if (entity instanceof Bullet && !((Bullet) entity).isActive()) {
+                continue;
+            }
             renderSystem.render(entity);
         }
     }
     
-    private void updateGameState(boolean left, boolean right, boolean jump) {
+    private void updateGameState(boolean left, boolean right, boolean jump, boolean attack) {
         // Update game logic here
         gameManager.setLeftPressed(left);
         gameManager.setRightPressed(right);
         gameManager.setJumpPressed(jump);
-        
+        gameManager.setAttackPressed(attack);
         // Update game state
         gameManager.update();
         
