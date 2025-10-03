@@ -18,7 +18,7 @@ public class GameController {
     public void update(float delta) {
         handleInput();
         model.update(delta);
-        view.update(delta);
+
     }
     
     private void handleInput() {
@@ -55,9 +55,9 @@ public class GameController {
             player.shoot();
             anyKeyPressed = true;
         }
-        
+
         if (!anyKeyPressed) {
-            System.out.println("No movement keys pressed");
+
         }
     }
     

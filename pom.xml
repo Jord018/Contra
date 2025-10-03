@@ -100,7 +100,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
-                    <mainClass>org.game.contra.desktop.DesktopLauncher</mainClass>
+                    <mainClass>org.game.contra.DesktopLauncher</mainClass>
                     <cleanupDaemonThreads>false</cleanupDaemonThreads>
                     <arguments>
                         <argument>--add-opens</argument>

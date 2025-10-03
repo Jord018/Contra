@@ -15,7 +15,7 @@ public class GameModel {
     private Vector2 gravity;
     private boolean gameOver;
     private int score;
-
+    public static final float PPM = 32; // Pixels Per Meter
     public GameModel() {
         this.gravity = new Vector2(0, -9.8f);
         this.world = new World(gravity, true);
@@ -26,7 +26,7 @@ public class GameModel {
         this.worldCreator = new WorldCreator(world);
         
         // Initialize the player at position (10, 10) in the world (more centered in the viewport)
-        this.player = new Player(world, 5, 5);
+        this.player = new Player(world, 5, 10);
 
     }
 

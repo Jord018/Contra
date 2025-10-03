@@ -1,8 +1,7 @@
-package org.game.contra.desktop;
+package org.game.contra;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
-import org.game.contra.RunGunGame;
 
 public class DesktopLauncher {
     public static void main(String[] args) {

@@ -64,9 +64,6 @@ public class GameScreen implements Screen {
     public void render(float delta) {
         // Update game state
         update(delta);
-        
-        // Update view (including camera position)
-        view.update(delta);
 
         // Render the game through the view
         view.render();

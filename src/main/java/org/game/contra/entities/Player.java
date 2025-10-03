@@ -19,12 +19,6 @@ public class Player {
     private float jumpTimer = 0;
     // No texture needed for now, we'll use a colored rectangle
 
-    public Player(World world, float x, float y) {
-        position = new Vector2(x, y);
-        createBody(world);
-        
-        // No texture loading needed for now, we'll use a colored rectangle
-    }
 
     private void createBody(World world) {
         BodyDef bdef = new BodyDef();
@@ -75,33 +69,46 @@ public class Player {
         }
     }
 
-    private com.badlogic.gdx.graphics.glutils.ShapeRenderer shapeRenderer = new com.badlogic.gdx.graphics.glutils.ShapeRenderer();
+    private com.badlogic.gdx.graphics.glutils.ShapeRenderer shapeRenderer;
+    
+    public Player(World world, int x, int y) {
+        position = new Vector2(x, y);
+        this.shapeRenderer = new com.badlogic.gdx.graphics.glutils.ShapeRenderer();
+        createBody(world);
+    }
     
     public void draw(SpriteBatch batch) {
-        // End the SpriteBatch and use ShapeRenderer to draw a rectangle
+        // End the batch before using ShapeRenderer
         batch.end();
-        
-        // Draw a red rectangle as a placeholder for the player
+
+        // Draw the player as a red rectangle
         shapeRenderer.setProjectionMatrix(batch.getProjectionMatrix());
         shapeRenderer.begin(com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType.Filled);
         shapeRenderer.setColor(1, 0, 0, 1); // Red color
 
-        shapeRenderer.rect(position.x, position.y, width, height);
+        // Draw the player at the correct position and size
+        shapeRenderer.rect(
+            position.x * 32,      // x position in pixels
+            position.y * 32,      // y position in pixels
+            width * 32,           // width in pixels
+            height * 32           // height in pixels
+        );
+        
         shapeRenderer.end();
         
-        // Restart the SpriteBatch for other rendering
+        // Restart the batch for other rendering
         batch.begin();
     }
 
     public void moveLeft() {
         // Apply a force to the left
-        body.applyForceToCenter(-50f, 0, true);
+        body.applyForceToCenter(-150f, 0, true);
         facingRight = false;
     }
 
     public void moveRight() {
         // Apply a force to the right
-        body.applyForceToCenter(50f, 0, true);
+        body.applyForceToCenter(150f, 0, true);
         facingRight = true;
     }
 
@@ -133,20 +140,16 @@ public class Player {
     public float getHeight() {
         return height;
     }
-
     public void setJumping(boolean jumping) {
         isJumping = jumping;
     }
 
     public void dispose() {
-        if (shapeRenderer != null) {
-            shapeRenderer.dispose();
-        }
+        shapeRenderer.dispose();
     }
     public boolean isGrounded() {
         return !isJumping;
     }
-    
     // Helper method for debugging
     public String getJumpState() {
         return isJumping ? "JUMPING" : "ON_GROUND";
