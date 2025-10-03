@@ -126,7 +126,7 @@ public class CollisionSystem {
                a.getY() + a.getHeight() > b.getY();
     }
     
-    public void checkFloorCollisions() {
+    private void checkFloorCollisions() {
         if (player == null) return;
         
         TransformComponent playerTransform = player.getComponent(TransformComponent.class);
@@ -139,40 +139,82 @@ public class CollisionSystem {
         float playerHeight = (float) playerTransform.getHeight();
         float playerFeetY = playerY + playerHeight;
         float playerLeft = playerX;
-        float playerRight = playerLeft + playerWidth;
+        float playerRight = playerX + playerWidth;
         
         // Get player's vertical velocity
         float verticalVelocity = (float) playerTransform.getVelocityY();
         boolean wasOnGround = player.isOnGround();
         boolean isOnGround = false;
         
-        for (Floor floor : floors) {
+        // Debug info
+        System.out.println("\n--- Collision Debug ---");
+        System.out.println("Player position: (" + playerX + ", " + playerY + ")");
+        System.out.println("Player feet Y: " + playerFeetY);
+        System.out.println("Velocity Y: " + verticalVelocity);
+        
+        // Store the best floor (highest one we can land on)
+        Floor bestFloor = null;
+        float highestFloorY = Float.NEGATIVE_INFINITY;
+        
+        // First pass: find the highest floor we're standing on
+        for (int i = 0; i < floors.size(); i++) {
+            Floor floor = floors.get(i);
             float floorTop = floor.getY();
             float floorLeft = floor.getX();
             float floorRight = floorLeft + floor.getWidth();
             
-            // Check if player's feet are colliding with the top of the floor
-            boolean feetColliding = (playerFeetY + verticalVelocity) >= floorTop &&  // Player is above or at floor level
-                                 playerY < floorTop &&                              // Player is above floor (not inside)
-                                 playerRight > floorLeft &&                         // Player's right side is right of floor's left
-                                 playerLeft < floorRight;                           // Player's left side is left of floor's right
+            // Debug floor info
+            System.out.println("\nFloor " + i + ":");
+            System.out.println("  Position: (" + floorLeft + ", " + floorTop + ") to (" + floorRight + ", " + floorTop + ")");
             
-            if (feetColliding) {
-                // Snap player to the top of the floor
-                playerTransform.setY(floorTop - playerHeight);
+            // Check if player is within the floor's X bounds
+            boolean withinXBounds = playerRight > floorLeft && playerLeft < floorRight;
+            
+            // Check if player is above the floor and close enough to land on it
+            // In this coordinate system, higher Y values are lower on the screen
+            boolean isAboveFloor = playerFeetY >= floorTop;  // Changed from <= to >=
+            boolean isCloseEnough = playerFeetY + verticalVelocity <= floorTop + 20;  // Changed from >= to <=
+            boolean canLand = isAboveFloor && isCloseEnough;
+            
+            System.out.println("  withinXBounds: " + withinXBounds);
+            System.out.println("  isAboveFloor: " + isAboveFloor + " (playerFeetY: " + playerFeetY + ", floorTop: " + floorTop + ")");
+            System.out.println("  isCloseEnough: " + isCloseEnough + " (nextY: " + (playerFeetY + verticalVelocity) + ")");
+            
+            if (withinXBounds && canLand && (bestFloor == null || floorTop < highestFloorY)) {
+                highestFloorY = floorTop;
+                bestFloor = floor;
+                System.out.println("  ^ This is the best floor so far");
+            }
+        }
+        
+        // If we found a floor to land on
+        if (bestFloor != null) {
+            System.out.println("\nBest floor found at Y: " + highestFloorY);
+            
+            // Only snap to floor if we're falling or on the floor
+            if (verticalVelocity >= 0) {
+                // Calculate the correction needed to land on the floor
+                // In this coordinate system, we need to position the player above the floor
+                float targetY = highestFloorY - playerHeight;
                 
-                // Stop downward movement
+                // Apply the correction to the player's position
+                playerTransform.setY(targetY);
+                
+                // Reset vertical velocity if we're landing
                 if (verticalVelocity > 0) {
                     playerTransform.setVelocityY(0);
                 }
                 
                 isOnGround = true;
-                break;
+                System.out.println("Player landed on floor!");
             }
+        } else {
+            System.out.println("No suitable floor found!");
         }
         
         // Update player's onGround state
         player.setOnGround(isOnGround);
+        System.out.println("isOnGround: " + isOnGround);
         
         // If we just landed, trigger landing logic
 
