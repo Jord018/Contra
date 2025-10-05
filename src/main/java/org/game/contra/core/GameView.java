@@ -17,6 +17,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import org.game.contra.RunGunGame;
+import org.game.contra.entities.Bullet;
 
 
 public class GameView implements Disposable {
@@ -76,13 +77,17 @@ private StretchViewport viewport;
                 false,                      // flipX
                 false);                     // flipY
         }
-
+        batch.end();
         // Draw game objects
         if (model.getPlayer() != null) {
+            batch.begin();
             model.getPlayer().draw(batch);
+            System.out.println("Active bullets: " + model.getPlayer().getBullets().size());
+            for (Bullet bullet : model.getPlayer().getBullets()) {
+                bullet.render(batch);
+            }
+            batch.end();
         }
-
-        batch.end();
         //debug render
         if (debug) {
             debugRenderer.render(model.getWorld(), viewport.getCamera().combined);

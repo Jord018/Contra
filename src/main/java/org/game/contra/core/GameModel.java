@@ -41,7 +41,8 @@ public class GameModel {
 
             // Update player
             player.update(delta);
-            
+
+
             // Clear applied forces
             player.getBody().setLinearVelocity(player.getBody().getLinearVelocity().x * 0.9f, player.getBody().getLinearVelocity().y);
         }

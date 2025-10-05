@@ -8,6 +8,9 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import org.game.contra.RunGunGame;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+
 public class Player {
     private Body body;
     private Vector2 position;
@@ -17,6 +20,10 @@ public class Player {
     private float height = 1.0f; // 1.8 meters tall (average human height)
     private float jumpCooldown = 0.1f; // Small cooldown to prevent double jumps
     private float jumpTimer = 0;
+    private ArrayList<Bullet> bullets;
+    private Texture bulletTexture;
+    private float shootCooldown = 0.5f;
+    private float shootTimer = 0;
     public boolean onGround;
     private boolean isFallingThrough = false;
 
@@ -62,6 +69,20 @@ public class Player {
         if (jumpTimer > 0) {
             jumpTimer -= delta;
         }
+        // Update shoot timer
+        if (shootTimer > 0) {
+            shootTimer -= delta;
+        }
+
+        // Update bullets
+        Iterator<Bullet> iter = bullets.iterator();
+        while (iter.hasNext()) {
+            Bullet bullet = iter.next();
+            bullet.update(delta);
+            if (!bullet.isActive()) {
+                iter.remove();
+            }
+        }
 
         // Check if player is on the ground (velocity is nearly zero)
         boolean wasJumping = isJumping;
@@ -79,13 +100,26 @@ public class Player {
     public Player(World world, int x, int y) {
         position = new Vector2(x, y);
         this.shapeRenderer = new com.badlogic.gdx.graphics.glutils.ShapeRenderer();
+        // Try loading the bullet texture
+        try {
+            // Make sure the path is correct and the file exists
+            String texturePath = "Bullet/Bullet.png";
+            if (Gdx.files.internal(texturePath).exists()) {
+                this.bulletTexture = new Texture(Gdx.files.internal(texturePath));
+                Gdx.app.log("Player", "Successfully loaded bullet texture from: " + texturePath);
+            } else {
+                Gdx.app.error("Player", "Bullet texture not found at: " +
+                        Gdx.files.getLocalStoragePath() + texturePath);
+            }
+        } catch (Exception e) {
+            Gdx.app.error("Player", "Error loading bullet texture", e);
+        }
+        this.bullets = new ArrayList<>();
         createBody(world);
     }
 
     public void draw(SpriteBatch batch) {
-        // End the batch before using ShapeRenderer
         batch.end();
-
         // Draw the player as a red rectangle
         shapeRenderer.setProjectionMatrix(batch.getProjectionMatrix());
         shapeRenderer.begin(com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType.Filled);
@@ -98,10 +132,7 @@ public class Player {
                 width * 32,           // width in pixels
                 height * 32           // height in pixels
         );
-
         shapeRenderer.end();
-
-        // Restart the batch for other rendering
         batch.begin();
     }
 
@@ -142,19 +173,25 @@ public class Player {
         System.out.println("Falling through platform...");
     }
     public void shoot() {
-        // TODO: Implement shooting
+        if (shootTimer <= 0) {
+            System.out.println("Shooting! Bullet texture is " +
+                    (bulletTexture != null ? "loaded" : "MISSING"));
+            Vector2 bulletPos = new Vector2(
+                    position.x + (facingRight ? width : 0),
+                    position.y + height/2
+            );
+            System.out.println("Creating bullet at: " + bulletPos);
+            Bullet bullet = new Bullet(25, 30, bulletTexture);
+            bullet.setPosition(bulletPos);
+            bullet.setDirection(facingRight);
+            bullets.add(bullet);
+            shootTimer = shootCooldown;
+        }
     }
     public Vector2 getPosition() {
         return position;
     }
 
-    public float getWidth() {
-        return width;
-    }
-
-    public float getHeight() {
-        return height;
-    }
     public void setJumping(boolean jumping) {
         isJumping = jumping;
     }
@@ -175,4 +212,7 @@ public class Player {
         }
     }
 
+    public ArrayList<Bullet> getBullets() {
+        return bullets;
+    }
 }
