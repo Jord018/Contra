@@ -6,6 +6,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import org.game.contra.entities.Player;
+import org.game.contra.utils.Contact;
 import org.game.contra.utils.WorldCreator;
 
 public class GameModel {
@@ -22,6 +23,9 @@ public class GameModel {
         this.gameOver = false;
         this.score = 0;
         
+        // Set up contact listener
+        this.world.setContactListener(new Contact());
+        
         // Initialize the world creator
         this.worldCreator = new WorldCreator(world);
         
@@ -34,7 +38,7 @@ public class GameModel {
         if (player != null && !gameOver) {
             // Step the physics simulation
             world.step(1/60f, 6, 2);
-            
+
             // Update player
             player.update(delta);
             

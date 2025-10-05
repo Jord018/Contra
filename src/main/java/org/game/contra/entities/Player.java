@@ -17,7 +17,8 @@ public class Player {
     private float height = 1.0f; // 1.8 meters tall (average human height)
     private float jumpCooldown = 0.1f; // Small cooldown to prevent double jumps
     private float jumpTimer = 0;
-    // No texture needed for now, we'll use a colored rectangle
+    public boolean onGround;
+    private boolean isFallingThrough = false;
 
 
     private void createBody(World world) {
@@ -25,6 +26,7 @@ public class Player {
         bdef.position.set(position);
         bdef.type = BodyDef.BodyType.DynamicBody;
         body = world.createBody(bdef);
+        body.setUserData(this);  // Set this Player instance as the body's user data
 
         // Main fixture
         PolygonShape shape = new PolygonShape();
@@ -33,35 +35,38 @@ public class Player {
         FixtureDef fdef = new FixtureDef();
         fdef.shape = shape;
         fdef.filter.categoryBits = RunGunGame.PLAYER_BIT;
-        fdef.filter.maskBits = RunGunGame.GROUND_BIT | RunGunGame.OBJECT_BIT;
-        body.createFixture(fdef).setUserData(this);
+        fdef.filter.maskBits = RunGunGame.GROUND_BIT | RunGunGame.OBJECT_BIT| RunGunGame.PLATFORM_BIT;
+        body.createFixture(fdef).setUserData("body");
 
         // Foot sensor
         shape.setAsBox(width/2 - 0.1f, 0.1f, new Vector2(0, -height/2), 0);
         fdef.shape = shape;
         fdef.isSensor = true;
         body.createFixture(fdef).setUserData("foot");
-        
+
         shape.dispose();
     }
 
     public Body getBody() {
         return body;
     }
-    
+    public Vector2 getPosfoot() {
+        return body.getFixtureList().get(0).getBody().getPosition();
+    }
+
     public void update(float delta) {
         // Update position
         position.set(body.getPosition().x - width/2, body.getPosition().y - height/2);
-        
+
         // Update jump timer
         if (jumpTimer > 0) {
             jumpTimer -= delta;
         }
-        
+
         // Check if player is on the ground (velocity is nearly zero)
         boolean wasJumping = isJumping;
         isJumping = Math.abs(body.getLinearVelocity().y) > 0.1f;
-        
+
         // If we were in the air and now we're not, we've landed
         if (wasJumping && !isJumping) {
             System.out.println("Player landed (velocity-based detection)");
@@ -70,13 +75,13 @@ public class Player {
     }
 
     private com.badlogic.gdx.graphics.glutils.ShapeRenderer shapeRenderer;
-    
+
     public Player(World world, int x, int y) {
         position = new Vector2(x, y);
         this.shapeRenderer = new com.badlogic.gdx.graphics.glutils.ShapeRenderer();
         createBody(world);
     }
-    
+
     public void draw(SpriteBatch batch) {
         // End the batch before using ShapeRenderer
         batch.end();
@@ -88,19 +93,20 @@ public class Player {
 
         // Draw the player at the correct position and size
         shapeRenderer.rect(
-            position.x * 32,      // x position in pixels
-            position.y * 32,      // y position in pixels
-            width * 32,           // width in pixels
-            height * 32           // height in pixels
+                position.x * 32,      // x position in pixels
+                position.y * 32,      // y position in pixels
+                width * 32,           // width in pixels
+                height * 32           // height in pixels
         );
-        
+
         shapeRenderer.end();
-        
+
         // Restart the batch for other rendering
         batch.begin();
     }
 
     public void moveLeft() {
+
         // Apply a force to the left
         body.applyForceToCenter(-150f, 0, true);
         facingRight = false;
@@ -114,29 +120,38 @@ public class Player {
 
     public void jump() {
         // Only allow jumping if not moving up/down and cooldown is over
-        if (jumpTimer <= 0 && Math.abs(body.getLinearVelocity().y) < 0.1f) {
+        if (jumpTimer <= 0 && Math.abs(body.getLinearVelocity().y) < 0.1f && onGround) {
             System.out.println("Jumping! Velocity: " + body.getLinearVelocity().y);
-            body.applyLinearImpulse(new Vector2(0, 10f), body.getWorldCenter(), true);
+            body.applyLinearImpulse(new Vector2(0, 9f), body.getWorldCenter(), true);
             isJumping = true;
             jumpTimer = jumpCooldown;
+            onGround = false;
         } else {
-            System.out.println("Can't jump now. Velocity: " + body.getLinearVelocity().y + 
-                             ", Cooldown: " + jumpTimer);
+            System.out.println("Can't jump now. Velocity: " + body.getLinearVelocity().y +
+                    ", Cooldown: " + jumpTimer);
+            onGround = true;
         }
     }
+    public void moveDown() {
+        if (isFallingThrough) return;
+        isFallingThrough = true;
+        onGround = false;
 
+        body.applyLinearImpulse(new Vector2(0, -0.2f), body.getWorldCenter(), true);
+
+        System.out.println("Falling through platform...");
+    }
     public void shoot() {
         // TODO: Implement shooting
     }
-
     public Vector2 getPosition() {
         return position;
     }
-    
+
     public float getWidth() {
         return width;
     }
-    
+
     public float getHeight() {
         return height;
     }
@@ -147,12 +162,17 @@ public class Player {
     public void dispose() {
         shapeRenderer.dispose();
     }
-    public boolean isGrounded() {
-        return !isJumping;
-    }
+
     // Helper method for debugging
-    public String getJumpState() {
-        return isJumping ? "JUMPING" : "ON_GROUND";
+    public boolean isFallingThrough() {
+        return isFallingThrough;
+    }
+
+    public void stopFallingThrough() {
+        if (isFallingThrough) {
+            isFallingThrough = false;
+            System.out.println("Fall-through stopped, normal collision restored.");
+        }
     }
 
 }

@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import org.game.contra.RunGunGame;
 import org.game.contra.controller.GameController;
 import org.game.contra.core.GameModel;
@@ -58,6 +59,7 @@ public class GameScreen implements Screen {
         Gdx.input.setCatchKey(Input.Keys.A, true);
         Gdx.input.setCatchKey(Input.Keys.D, true);
         Gdx.input.setCatchKey(Input.Keys.W, true);
+        Gdx.input.setCatchKey(Input.Keys.S, true);
     }
 
     @Override
@@ -70,8 +72,11 @@ public class GameScreen implements Screen {
     }
 
     @Override
-    public void resize(int i, int i1) {
-
+    public void resize(int width, int height) {
+        // Forward the resize event to the view
+        if (view != null) {
+            view.resize(width, height);
+        }
     }
 
     @Override

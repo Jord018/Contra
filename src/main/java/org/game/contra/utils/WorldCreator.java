@@ -9,36 +9,43 @@ import org.game.contra.RunGunGame;
 public class WorldCreator {
     public WorldCreator(World world) {
         // Create ground
-        createPlatform(world, 4.2f, 1f, 15, 0.5f, true);
-        createPlatform(world, 6.2f, 5f, 7, 0.5f, false);
+        createPlatform(world, 2.8f, 0.25f, 9.9f, 0.5f, true);
+        createPlatform(world, 4.2f, 2.25f, 3.8f, 0.5f, false);
+        createPlatform(world, 4.2f, 3.25f, 3.8f, 0.5f, false);
     }
 
     private void createPlatform(World world, float x, float y, float width, float height, boolean isGround) {
 
-        // Create body definition
+        // Body definition
         BodyDef bdef = new BodyDef();
-        bdef.position.set(x + width/2, y + height/2);  // Center position
+        bdef.position.set(x + width / 2, y + height / 2);
         bdef.type = BodyDef.BodyType.StaticBody;
 
-        // Create body
         Body body = world.createBody(bdef);
 
-        // Create shape - using half-width and half-height
+        // Shape
         PolygonShape shape = new PolygonShape();
-        shape.setAsBox(width/2, height/2);
+        shape.setAsBox(width / 2, height / 2);
 
-        // Create fixture
         FixtureDef fdef = new FixtureDef();
         fdef.shape = shape;
         fdef.friction = 0.6f;
 
-        // Set collision bits if needed
         if (isGround) {
-            fdef.filter.categoryBits = 0x0001;
-            fdef.filter.maskBits = -1;
+            // ✅ Ground fixture
+            fdef.filter.categoryBits = RunGunGame.GROUND_BIT;
+            fdef.filter.maskBits = RunGunGame.PLAYER_BIT;
+            Fixture groundFixture = body.createFixture(fdef);
+            groundFixture.setUserData("ground");
+        } else {
+            // ✅ Platform fixture
+            fdef.filter.categoryBits = RunGunGame.PLATFORM_BIT;
+            fdef.filter.maskBits = RunGunGame.PLAYER_BIT;
+            Fixture platformFixture = body.createFixture(fdef);
+            platformFixture.setUserData("platform");
         }
 
-        body.createFixture(fdef);
         shape.dispose();
     }
+
 }

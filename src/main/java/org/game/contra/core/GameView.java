@@ -1,16 +1,22 @@
 package org.game.contra.core;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.StretchViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
+import org.game.contra.RunGunGame;
 
 
 public class GameView implements Disposable {
@@ -20,62 +26,79 @@ public class GameView implements Disposable {
     private Texture background;
     private Box2DDebugRenderer debugRenderer;
     private boolean debug = true; // Toggle debug rendering
-    private float screenWidth;
-    private float screenHeight;
+private StretchViewport viewport;
 
-    private Matrix4 debugMatrix;
 
     public GameView(GameModel model) {
         this.model = model;
         this.batch = new SpriteBatch();
         this.shapeRenderer = new ShapeRenderer();
-
+        
+        // Create viewport with world units
+        this.viewport = new StretchViewport(RunGunGame.V_WIDTH, RunGunGame.V_HEIGHT);
+        
+        // Set camera position to center of the world
+        viewport.getCamera().position.set(RunGunGame.V_WIDTH/2f, RunGunGame.V_HEIGHT/2f, 0);
+        viewport.getCamera().update();
+        
         // Load background image
-        background = new Texture(Gdx.files.internal("Stage/NES - Contra - Stages - Stage 1 (1).png"));
-        background.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.ClampToEdge);
-// In the GameView constructor, add this line after initializing debugMatrix:
-        debugRenderer = new Box2DDebugRenderer();
+        try {
+            background = new Texture(Gdx.files.internal("Stage/NES - Contra - Stages - Stage 1 (1).png"));
+            background.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        } catch (Exception e) {
+            Gdx.app.error("GameView", "Could not load background image", e);
+        }
 
-        this.screenWidth = Gdx.graphics.getWidth();
-        this.screenHeight = Gdx.graphics.getHeight();
-        debugMatrix = new Matrix4();
-        debugMatrix.setToOrtho2D(0, 0, screenWidth / GameModel.PPM, screenHeight / GameModel.PPM);
+        // Initialize debug renderer
+        debugRenderer = new Box2DDebugRenderer();
     }
     public void render() {
         // Clear the screen
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        // Update screen dimensions
-        screenWidth = Gdx.graphics.getWidth();
-        screenHeight = Gdx.graphics.getHeight();
-
+        // Update viewport and set projection matrix
+        viewport.apply();
+        batch.setProjectionMatrix(viewport.getCamera().combined);
+        
         // Begin drawing
         batch.begin();
 
         // Draw background to fill the entire screen
         if (background != null) {
-            batch.draw(background, 0, 0, screenWidth, screenHeight);
+            batch.draw(background,
+                0, 0,                        // x, y position
+                RunGunGame.V_WIDTH,          // width in world units
+                RunGunGame.V_HEIGHT,         // height in world units
+                0, 0,                       // srcX, srcY
+                background.getWidth(),       // srcWidth
+                background.getHeight(),      // srcHeight
+                false,                      // flipX
+                false);                     // flipY
         }
 
         // Draw game objects
-        model.getPlayer().draw(batch);
+        if (model.getPlayer() != null) {
+            model.getPlayer().draw(batch);
+        }
 
-        // End drawing
         batch.end();
         //debug render
-        if (debug && debugRenderer != null) {
-            debugRenderer.render(model.getWorld(), debugMatrix);
+        if (debug) {
+            debugRenderer.render(model.getWorld(), viewport.getCamera().combined);
             // Debug position output
             Vector2 playerPos = model.getPlayer().getBody().getPosition();
-            Gdx.app.log("Player Position", String.format("X: %.2f, Y: %.2f", playerPos.x, playerPos.y));
+            Vector3 camPos = viewport.getCamera().position;
+
+            //Gdx.app.log("Player Position", String.format("X: %.2f, Y: %.2f", playerPos.x, playerPos.y));
+            //System.out.println(model.getPlayer().getPosfoot());
         }
     }
 
     public void resize(int width, int height) {
-        this.screenWidth = width;
-        this.screenHeight = height;
-        debugMatrix.setToOrtho2D(0, 0, screenWidth / GameModel.PPM, screenHeight / GameModel.PPM);
+        viewport.update(width, height, true);
+        viewport.getCamera().position.set(RunGunGame.V_WIDTH/2f, RunGunGame.V_HEIGHT/2f, 0);
+        viewport.getCamera().update();
     }
 
     @Override

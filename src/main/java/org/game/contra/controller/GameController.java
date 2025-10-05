@@ -39,6 +39,16 @@ public class GameController {
             player.moveLeft();
             anyKeyPressed = true;
         }
+        if (Gdx.input.isKeyPressed(Input.Keys.S) && Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
+            System.out.println("DOWN key pressed");
+            player.moveDown();
+            anyKeyPressed = true;
+        }
+        if(Gdx.input.isButtonJustPressed(Input.Keys.ENTER)){
+            System.out.println("SHOOT key pressed");
+            player.shoot();
+            anyKeyPressed = true;
+        }
         
         // Handle jumping
         if ((Gdx.input.isKeyJustPressed(Input.Keys.UP) || 
