@@ -27,7 +27,13 @@ public class GameView implements Disposable {
     private Texture background;
     private Box2DDebugRenderer debugRenderer;
     private boolean debug = true; // Toggle debug rendering
-private StretchViewport viewport;
+
+    public StretchViewport getViewport() {
+        return viewport;
+    }
+
+    private StretchViewport viewport;
+
 
 
     public GameView(GameModel model) {
@@ -80,9 +86,10 @@ private StretchViewport viewport;
         batch.end();
         // Draw game objects
         if (model.getPlayer() != null) {
-            batch.begin();
             model.getPlayer().draw(batch);
-            System.out.println("Active bullets: " + model.getPlayer().getBullets().size());
+            model.getBoss().draw(batch);
+            System.out.println("Heath Boss: " + model.getBoss().getHealt());
+            batch.begin();
             for (Bullet bullet : model.getPlayer().getBullets()) {
                 bullet.render(batch);
             }

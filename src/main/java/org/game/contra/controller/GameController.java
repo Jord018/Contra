@@ -2,6 +2,9 @@ package org.game.contra.controller;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.utils.viewport.StretchViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import org.game.contra.core.GameModel;
 import org.game.contra.core.GameView;
 import org.game.contra.entities.Player;
@@ -9,10 +12,12 @@ import org.game.contra.entities.Player;
 public class GameController {
     private GameModel model;
     private GameView view;
+    private StretchViewport viewport;
     
-    public GameController(GameModel model, GameView view) {
+    public GameController(GameModel model, GameView view, StretchViewport viewport) {
         this.model = model;
         this.view = view;
+        this.viewport = viewport;
     }
     
     public void update(float delta) {
@@ -44,11 +49,6 @@ public class GameController {
             player.moveDown();
             anyKeyPressed = true;
         }
-        if(Gdx.input.isButtonJustPressed(Input.Keys.ENTER)){
-            System.out.println("SHOOT key pressed");
-            player.shoot();
-            anyKeyPressed = true;
-        }
         
         // Handle jumping
         if ((Gdx.input.isKeyJustPressed(Input.Keys.UP) || 
@@ -60,9 +60,9 @@ public class GameController {
         }
         
         // Handle shooting
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
+        if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
             System.out.println("SHOOT key pressed");
-            player.shoot();
+            player.shoot(viewport);
             anyKeyPressed = true;
         }
 

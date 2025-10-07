@@ -25,7 +25,7 @@ public class GameScreen implements Screen {
         // Initialize view
         view = new GameView(model);
         // Initialize controller
-        controller = new GameController(model, view);
+        controller = new GameController(model, view, view.getViewport());
     }
 
     public void update(float delta) {

@@ -1,11 +1,14 @@
 package org.game.contra.entities;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import org.game.contra.RunGunGame;
 
 import java.util.ArrayList;
@@ -22,10 +25,20 @@ public class Player {
     private float jumpTimer = 0;
     private ArrayList<Bullet> bullets;
     private Texture bulletTexture;
-    private float shootCooldown = 0.5f;
+    private float shootCooldown = 0.25f;
     private float shootTimer = 0;
     public boolean onGround;
     private boolean isFallingThrough = false;
+    private World world;
+
+    public ArrayList<Bullet> getBulletsToAdd() {
+        return bulletsToAdd;
+    }
+
+    private ArrayList<Bullet> bulletsToAdd = new ArrayList<>();
+    private ArrayList<Bullet> bulletsToRemove = new ArrayList<>();
+
+
 
 
     private void createBody(World world) {
@@ -69,20 +82,18 @@ public class Player {
         if (jumpTimer > 0) {
             jumpTimer -= delta;
         }
+        
         // Update shoot timer
         if (shootTimer > 0) {
             shootTimer -= delta;
         }
 
         // Update bullets
-        Iterator<Bullet> iter = bullets.iterator();
-        while (iter.hasNext()) {
-            Bullet bullet = iter.next();
+        for (Bullet bullet : bullets) {
             bullet.update(delta);
-            if (!bullet.isActive()) {
-                iter.remove();
-            }
+
         }
+
 
         // Check if player is on the ground (velocity is nearly zero)
         boolean wasJumping = isJumping;
@@ -98,6 +109,7 @@ public class Player {
     private com.badlogic.gdx.graphics.glutils.ShapeRenderer shapeRenderer;
 
     public Player(World world, int x, int y) {
+        this.world = world;
         position = new Vector2(x, y);
         this.shapeRenderer = new com.badlogic.gdx.graphics.glutils.ShapeRenderer();
         // Try loading the bullet texture
@@ -119,7 +131,7 @@ public class Player {
     }
 
     public void draw(SpriteBatch batch) {
-        batch.end();
+
         // Draw the player as a red rectangle
         shapeRenderer.setProjectionMatrix(batch.getProjectionMatrix());
         shapeRenderer.begin(com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType.Filled);
@@ -133,7 +145,7 @@ public class Player {
                 height * 32           // height in pixels
         );
         shapeRenderer.end();
-        batch.begin();
+
     }
 
     public void moveLeft() {
@@ -172,22 +184,31 @@ public class Player {
 
         System.out.println("Falling through platform...");
     }
-    public void shoot() {
-        if (shootTimer <= 0) {
-            System.out.println("Shooting! Bullet texture is " +
-                    (bulletTexture != null ? "loaded" : "MISSING"));
-            Vector2 bulletPos = new Vector2(
-                    position.x + (facingRight ? width : 0),
-                    position.y + height/2
-            );
-            System.out.println("Creating bullet at: " + bulletPos);
-            Bullet bullet = new Bullet(25, 30, bulletTexture);
-            bullet.setPosition(bulletPos);
-            bullet.setDirection(facingRight);
-            bullets.add(bullet);
-            shootTimer = shootCooldown;
-        }
+    public void shoot(Viewport viewport) {
+        if (shootTimer > 0) return; // ยัง cooldown
+
+        Vector2 mouseWorld = new Vector2();
+        viewport.unproject(mouseWorld.set(Gdx.input.getX(), Gdx.input.getY()));
+
+        // ทิศทางจาก player → cursor
+        Vector2 direction = new Vector2(mouseWorld.x - position.x, mouseWorld.y - (position.y + height/2));
+
+        // สร้าง bullet
+        Bullet bullet = new Bullet(
+                direction,
+                10,
+                30,
+                // speed
+                bulletTexture);
+
+        bullet.setPosition(new Vector2(position.x + width/2, position.y + height/2));
+        bullet.setDirection(direction);
+        bulletsToAdd.add(bullet);
+        shootTimer = shootCooldown; // reset timer
+
+        System.out.println("Shooting! Bullet at " + bullet.getPosition() + " toward " + direction);
     }
+
     public Vector2 getPosition() {
         return position;
     }
