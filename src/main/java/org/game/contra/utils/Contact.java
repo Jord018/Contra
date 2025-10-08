@@ -17,41 +17,33 @@ public class Contact implements ContactListener{
 
         Object dataA = fixtureA.getUserData();
         Object dataB = fixtureB.getUserData();
-        
-        // Enhanced debug logging
-        Gdx.app.log("Contact", "--- New Collision ---");
-        Gdx.app.log("Contact", "FixtureA: " + dataA + " (Type: " + (dataA != null ? dataA.getClass().getSimpleName() : "null") + ")");
-        Gdx.app.log("Contact", "FixtureB: " + dataB + " (Type: " + (dataB != null ? dataB.getClass().getSimpleName() : "null") + ")");
-        
-        // Log body types for debugging
-        if (fixtureA.getBody() != null && fixtureB.getBody() != null) {
-            Gdx.app.log("Contact", "BodyA Type: " + fixtureA.getBody().getType() + ", BodyB Type: " + fixtureB.getBody().getType());
-        }
-        // ---------- Player Foot Sensor ----------
+
+        // [Keep your existing debug logging...]
+
+        // Handle foot sensor
         if ("foot".equals(dataA)) {
             handleFootContact(fixtureA, fixtureB, contact);
         } else if ("foot".equals(dataB)) {
             handleFootContact(fixtureB, fixtureA, contact);
         }
 
-        // ---------- Bullet Collision ----------
-        if (dataA instanceof Bullet && dataB instanceof Boss) {
-            Bullet bullet = (Bullet) dataA;
-            Boss boss = (Boss) dataB;
-            bullet.destroy();       // ทำลาย bullet
-            boss.takeDamage(25);   // ลด hp ของ boss
-        } else if (dataB instanceof Bullet && dataA instanceof Boss) {
-            Bullet bullet = (Bullet) dataB;
-            Boss boss = (Boss) dataA;
-            bullet.destroy();
-            boss.takeDamage(25);
-        }
-
-        // ---------- Bullet Hit Ground ----------
-        if (dataA instanceof Bullet && "ground".equals(dataB)) {
-            ((Bullet)dataA).destroy();
-        } else if (dataB instanceof Bullet && "ground".equals(dataA)) {
-            ((Bullet)dataB).destroy();
+        // Mark bullets for destruction instead of destroying them immediately
+        if (dataA instanceof Bullet) {
+            if (dataB instanceof Boss) {
+                Boss boss = (Boss) dataB;
+                ((Bullet) dataA).markForDestruction();
+                boss.takeDamage(25);
+            } else if ("ground".equals(dataB)) {
+                ((Bullet) dataA).markForDestruction();
+            }
+        } else if (dataB instanceof Bullet) {
+            if (dataA instanceof Boss) {
+                Boss boss = (Boss) dataA;
+                ((Bullet) dataB).markForDestruction();
+                boss.takeDamage(25);
+            } else if ("ground".equals(dataA)) {
+                ((Bullet) dataB).markForDestruction();
+            }
         }
     }
 

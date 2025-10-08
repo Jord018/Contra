@@ -1,6 +1,5 @@
 package org.game.contra.entities;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -19,6 +18,8 @@ public class Bullet {
     private World world;
     private Vector2 velocity; // ใช้เก็บ direction * speed
     private float rotation;   // มุมหมุน (degree)
+    private boolean shouldBeDestroyed = false;
+    private ShapeRenderer shapeRenderer;
 
     public Bullet(Vector2 velocity,float damage, float speed, Texture texture) {
         this.Damage = damage;
@@ -28,7 +29,13 @@ public class Bullet {
         this.velocity = velocity.cpy().nor().scl(speed);
         this.position = new Vector2();
         this.rotation = 0f;
+        this.shapeRenderer = new ShapeRenderer();
     }
+
+    public Body getBody() {
+        return body;
+    }
+
     public void createBody(World world) {
         if (body != null) return; // ถ้ามีแล้ว ไม่สร้างซ้ำ
 
@@ -93,6 +100,15 @@ public class Bullet {
                     rotation,
                     0, 0, texture.getWidth(), texture.getHeight(),
                     false, false);
+        } else {
+            // Fallback: draw as a yellow circle when no texture is available
+            batch.end();
+            shapeRenderer.setProjectionMatrix(batch.getProjectionMatrix());
+            shapeRenderer.begin(com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType.Filled);
+            shapeRenderer.setColor(1, 1, 0, 1); // Yellow color
+            shapeRenderer.circle(pos.x, pos.y, 0.1f); // Draw circle with radius 0.1f
+            shapeRenderer.end();
+            batch.begin();
         }
     }
 
@@ -100,10 +116,20 @@ public class Bullet {
     public Vector2 getPosition() { return position; }
     public void destroy() {
         Active = false;
+        if (shapeRenderer != null) {
+            shapeRenderer.dispose();
+        }
         if (body != null) {
             body.getWorld().destroyBody(body);
             body = null;
         }
+    }
+    public void markForDestruction() {
+        shouldBeDestroyed = true;
+    }
+
+    public boolean shouldBeDestroyed() {
+        return shouldBeDestroyed;
     }
 
 }

@@ -17,59 +17,94 @@ import java.util.Iterator;
 public class GameModel {
     private World world;
     private Player player;
-    private Boss boss;
+    private ArrayList<Boss> bosses = new ArrayList<>();
     private WorldCreator worldCreator;
     private Vector2 gravity;
     private boolean gameOver;
     private int score;
-    public static final float PPM = 32; // Pixels Per Meter
     public GameModel() {
         this.gravity = new Vector2(0, -9.8f);
         this.world = new World(gravity, true);
         this.gameOver = false;
         this.score = 0;
-        
+
         // Set up contact listener
         this.world.setContactListener(new Contact());
-        
+
         // Initialize the world creator
         this.worldCreator = new WorldCreator(world);
-        
-        // Initialize the player at position (10, 10) in the world (more centered in the viewport)
-        this.player = new Player(world, 5, 2);
-        this.boss = new Boss(world, 12, 2);
 
+        // Initialize the player
+        this.player = new Player(world, 5, 2);
+
+        // Add multiple bosses with different positions and sizes
+        bosses.add(new Boss(world, 12.45f, 3.75f, 0.5f, 0.5f));
+        bosses.add(new Boss(world, 11.50f, 3.75f, 0.5f, 0.5f));
+        bosses.add(new Boss(world, 11.75f, 1.85f, 1.0f, 1.0f));
     }
 
     public void update(float delta) {
         if (player != null && !gameOver) {
-
-            // 1️⃣ Physics step ก่อน update player
+            // 1. Physics step
             world.step(1/60f, 6, 2);
 
-            // 2️⃣ Update player
+            // 2. Update entities
             player.update(delta);
-            boss.update(delta);
 
-            // 3️⃣ สร้าง Bullet หลัง physics step เสร็จ
+            // Update all bosses
+            Iterator<Boss> bossIter = bosses.iterator();
+            while (bossIter.hasNext()) {
+                Boss boss = bossIter.next();
+                boss.update(delta);
+
+                // Remove dead bosses
+                if (!boss.isAlive()) {
+                    boss.destroy();
+                    bossIter.remove();
+                }
+            }
+
+            // 3. Add new player bullets after physics step
             ArrayList<Bullet> bulletsToAdd = new ArrayList<>(player.getBulletsToAdd());
             for (Bullet b : bulletsToAdd) {
-                b.createBody(world);  // ปลอดภัยเพราะ step เสร็จแล้ว
+                b.createBody(world);
                 player.getBullets().add(b);
             }
             player.getBulletsToAdd().clear();
 
-            // 4️⃣ ลบ bullets ที่ไม่ active
-            Iterator<Bullet> iter = player.getBullets().iterator();
-            while (iter.hasNext()) {
-                Bullet b = iter.next();
-                if (!b.isActive()) {
-                    b.destroy();   // safe
-                    iter.remove();
+            // 4. Clean up player bullets that are marked for destruction or inactive
+            Iterator<Bullet> bulletIter = player.getBullets().iterator();
+            while (bulletIter.hasNext()) {
+                Bullet b = bulletIter.next();
+                if (b.shouldBeDestroyed() || !b.isActive()) {
+                    b.destroy();
+                    bulletIter.remove();
+                }
+            }
+            
+            // 5. Update and clean up boss bullets
+            for (Boss boss : bosses) {
+                // Update boss bullets
+                Iterator<Bullet> bossBulletIter = boss.getBullets().iterator();
+                while (bossBulletIter.hasNext()) {
+                    Bullet bullet = bossBulletIter.next();
+                    // Update bullet position
+                    if (bullet.getBody() != null) {
+                        bullet.update(delta);
+                    }
+                    
+                    // Remove bullets that are out of bounds or inactive
+                    if (bullet.shouldBeDestroyed() || !bullet.isActive() || 
+                        bullet.getPosition().x < 0 || bullet.getPosition().x > 100) {
+                        if (bullet.getBody() != null) {
+                            world.destroyBody(bullet.getBody());
+                        }
+                        bossBulletIter.remove();
+                    }
                 }
             }
 
-            // 5️⃣ Clear applied horizontal velocity
+            // 5. Apply damping to player's horizontal velocity
             Body pBody = player.getBody();
             pBody.setLinearVelocity(pBody.getLinearVelocity().x * 0.9f, pBody.getLinearVelocity().y);
         }
@@ -81,16 +116,22 @@ public class GameModel {
         return player;
     }
     public Boss getBoss() {
-        return boss;
+        if (bosses.isEmpty()) {
+            return null;
+        }
+        // Return the first alive boss, or null if none are alive
+        for (Boss boss : bosses) {
+            if (boss.isAlive()) {
+                return boss;
+            }
+        }
+        return null; // No alive bosses
+    }
+    public ArrayList<Boss> getBosses() {
+        return bosses;
     }
 
-    public void setPlayer(Player player) {
-        this.player = player;
-    }
 
-    public Vector2 getGravity() {
-        return gravity;
-    }
 
     public boolean isGameOver() {
         return gameOver;
@@ -111,9 +152,7 @@ public class GameModel {
         if (player != null) {
             player.dispose();
         }
-        if (boss != null) {
-            boss.dispose();
-        }
+
     }
 
     public void addScore(int points) {

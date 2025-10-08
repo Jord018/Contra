@@ -17,6 +17,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import org.game.contra.RunGunGame;
+import org.game.contra.entities.Boss;
 import org.game.contra.entities.Bullet;
 
 
@@ -86,14 +87,42 @@ public class GameView implements Disposable {
         batch.end();
         // Draw game objects
         if (model.getPlayer() != null) {
-            model.getPlayer().draw(batch);
-            model.getBoss().draw(batch);
-            System.out.println("Heath Boss: " + model.getBoss().getHealt());
+            if (model.getPlayer().isAlive()) {
+                model.getPlayer().draw(batch);
+            }
+
+            // Draw all bosses and their bullets
+            for (Boss boss : model.getBosses()) {
+                if (boss.isAlive()) {
+                    boss.draw(batch);
+
+                    // Draw boss bullets
+                    batch.begin();
+                    for (Bullet bullet : boss.getBullets()) {
+                        if (bullet.isActive()) {
+                            bullet.render(batch);
+                        }
+                    }
+                    batch.end();
+                }
+            }
+
+            // Draw player bullets
             batch.begin();
             for (Bullet bullet : model.getPlayer().getBullets()) {
-                bullet.render(batch);
+                if (bullet.isActive()) {
+                    bullet.render(batch);
+                }
             }
             batch.end();
+            
+            // Debug info
+            if (!model.getBosses().isEmpty()) {
+                Boss firstBoss = model.getBosses().get(0);
+                Gdx.app.log("Boss", "Position: " + firstBoss.getPosition() + 
+                                  ", Alive: " + firstBoss.isAlive() + 
+                                  ", Bullets: " + firstBoss.getBullets().size());
+            }
         }
         //debug render
         if (debug) {

@@ -30,6 +30,7 @@ public class Player {
     public boolean onGround;
     private boolean isFallingThrough = false;
     private World world;
+    boolean Dead;
 
     public ArrayList<Bullet> getBulletsToAdd() {
         return bulletsToAdd;
@@ -235,5 +236,9 @@ public class Player {
 
     public ArrayList<Bullet> getBullets() {
         return bullets;
+    }
+
+    public boolean isAlive() {
+        return !Dead;
     }
 }

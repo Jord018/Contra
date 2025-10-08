@@ -3,6 +3,7 @@ package org.game.contra.entities;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -15,14 +16,15 @@ public class Boss {
     private Body body;
     private Vector2 position;
 
-    private float width = 1.0f; // 1 meter wide
-    private float height = 1.0f; // 1.8 meters tall (average human height)
+    private float width; // 1 meter wide
+    private float height; // 1.8 meters tall (average human height)
 
     private ArrayList<Bullet> bullets;
+    private ArrayList<Boss> bosses;
     private Texture bulletTexture;
-    private float shootCooldown = 0.25f;
+    private float shootCooldown = 0f;
     private float shootTimer = 0;
-    private float Healt = 10;
+    private float Healt = 100;
     private boolean Dead;
     private World world;
 
@@ -55,33 +57,32 @@ public class Boss {
 
 
     public void update(float delta) {
+        if (body == null) return;
         // Update position
         position.set(body.getPosition().x - width/2, body.getPosition().y - height/2);
 
-
         // Update shoot timer
         if (shootTimer > 0) {
+            float oldTimer = shootTimer;
             shootTimer -= delta;
-        }
-
-        // Update bullets
-        Iterator<Bullet> iter = bullets.iterator();
-        while (iter.hasNext()) {
-            Bullet bullet = iter.next();
-            bullet.update(delta);
-            if (!bullet.isActive()) {
-                iter.remove();
+            // Log when timer is about to expire
+            if (oldTimer > 0.1f && shootTimer <= 0.1f) {
+                Gdx.app.log("Boss", "Shoot timer expired, ready to shoot!");
             }
         }
 
-
+        if (Dead) {
+            destroy();
+        }
     }
 
     private com.badlogic.gdx.graphics.glutils.ShapeRenderer shapeRenderer;
 
-    public Boss(World world, int x, int y) {
+    public Boss(World world, float x, float y,float width,float height) {
         position = new Vector2(x, y);
         this.world = world;
+        this.width = width;
+        this.height = height;
         this.shapeRenderer = new com.badlogic.gdx.graphics.glutils.ShapeRenderer();
         // Try loading the bullet texture
         try {
@@ -102,12 +103,12 @@ public class Boss {
     }
 
     public void draw(SpriteBatch batch) {
-        // Draw the boss as a red rectangle
+        // Draw the boss as a red rectangle outline (border only)
         shapeRenderer.setProjectionMatrix(batch.getProjectionMatrix());
-        shapeRenderer.begin(com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.begin(com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType.Line);
         shapeRenderer.setColor(1, 0, 0, 1); // Red color
 
-        // Draw the boss at the correct position and size
+        // Draw the boss outline at the correct position and size
         shapeRenderer.rect(
                 position.x,      // x position in world units
                 position.y,      // y position in world units
@@ -116,29 +117,36 @@ public class Boss {
         );
         shapeRenderer.end();
     }
-    public void shoot(Viewport viewport) {
-        if (shootTimer > 0) return; // ยัง cooldown
+    public void shoot() {
+        if (shootTimer > 0) {
+            Gdx.app.log("Boss", "Shoot on cooldown: " + shootTimer);
+            return; // Still in cooldown
+        }
 
-        Vector2 mouseWorld = new Vector2();
-        viewport.unproject(mouseWorld.set(Gdx.input.getX(), Gdx.input.getY()));
+        Gdx.app.log("Boss", "Shooting bullet!");
+        float speed = MathUtils.random(5, 10);
 
-        // ทิศทางจาก player → cursor
-        Vector2 direction = new Vector2(mouseWorld.x - position.x, mouseWorld.y - (position.y + height/2));
+        // Create bullet with zero velocity initially
+        Bullet bullet = new Bullet(Vector2.Zero, 10, speed, bulletTexture);
 
-        // สร้าง bullet
-        Bullet bullet = new Bullet(
-                new Vector2(position.x + width/2, position.y + height/2),
-                10,
-                5,
-                // speed
-                bulletTexture);
-        bullet.setPosition(new Vector2(position.x + width/2, position.y + height/2));
-        bullet.setDirection(direction); // ยิงไป cursor
+        // Set bullet position at boss's position
+        Vector2 bulletPos = new Vector2(position.x-0.15f, position.y + height/2);
+        bullet.setPosition(bulletPos);
 
-        bullets.add(bullet);
-        shootTimer = shootCooldown; // reset timer
+        // Set direction to left (negative x direction)
+        bullet.setDirection(new Vector2(-10f, 37f));
 
-        System.out.println("Shooting! Bullet at " + bullet.getPosition() + " toward " + direction);
+        // Add bullet to the world
+        if (world != null) {
+            bullet.createBody(world);
+            bullets.add(bullet);
+            shootTimer = shootCooldown; // Reset cooldown timer
+
+            Gdx.app.log("Boss", "Bullet created at: " + bulletPos +
+                              ", Total bullets: " + bullets.size());
+        } else {
+            Gdx.app.error("Boss", "World is null, cannot create bullet!");
+        }
     }
 
     public Vector2 getPosition() {
@@ -156,14 +164,25 @@ public class Boss {
         return bullets;
     }
 
-    public float getHealt() {
-        return Healt;
-    }
-
     public void takeDamage(int i) {
         Healt -= i;
+        if (Healt <= 0) {
+            Healt = 0;
+            Dead = true;
+        }
     }
+
     public void isDead(){
         Dead = Healt == 0;
+    }
+    public boolean isAlive() {
+        return Healt > 0;
+    }
+
+    public void destroy() {
+        if (body != null) {
+            body.getWorld().destroyBody(body);
+            body = null;
+        }
     }
 }
