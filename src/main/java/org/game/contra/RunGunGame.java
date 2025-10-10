@@ -3,7 +3,7 @@ package org.game.contra;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import org.game.contra.screens.GameScreen;
+import org.game.contra.utils.GameScreen;
 
 public class RunGunGame extends Game {
     public static final float V_HEIGHT  = 9f;

@@ -7,11 +7,14 @@ import com.badlogic.gdx.physics.box2d.*;
 import org.game.contra.RunGunGame;
 
 public class WorldCreator {
-    public WorldCreator(World world) {
-        // Create ground
-        createPlatform(world, 2.8f, 0.25f, 9.9f, 0.5f, true);
-        createPlatform(world, 4.2f, 2.25f, 3.8f, 0.5f, false);
-        createPlatform(world, 4.2f, 3.25f, 3.8f, 0.5f, false);
+    public WorldCreator(World world, String screenName) {
+        switch (screenName) {
+            case "Screen1":
+            // Create ground
+            createPlatform(world, 2.8f, 0.25f, 9.9f, 0.5f, true);
+            createPlatform(world, 4.2f, 2.25f, 3.8f, 0.5f, false);
+            createPlatform(world, 4.2f, 3.25f, 3.8f, 0.5f, false);
+        }
     }
 
     private void createPlatform(World world, float x, float y, float width, float height, boolean isGround) {

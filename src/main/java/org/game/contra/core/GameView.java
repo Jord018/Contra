@@ -37,7 +37,7 @@ public class GameView implements Disposable {
 
 
 
-    public GameView(GameModel model) {
+    public GameView(GameModel model,String path) {
         this.model = model;
         this.batch = new SpriteBatch();
         this.shapeRenderer = new ShapeRenderer();
@@ -51,7 +51,7 @@ public class GameView implements Disposable {
         
         // Load background image
         try {
-            background = new Texture(Gdx.files.internal("Stage/NES - Contra - Stages - Stage 1 (1).png"));
+            background = new Texture(Gdx.files.internal(path));
             background.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         } catch (Exception e) {
             Gdx.app.error("GameView", "Could not load background image", e);

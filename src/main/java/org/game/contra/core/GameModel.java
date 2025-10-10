@@ -1,5 +1,4 @@
 package org.game.contra.core;
-
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -22,32 +21,50 @@ public class GameModel {
     private Vector2 gravity;
     private boolean gameOver;
     private int score;
-    public GameModel() {
-        this.gravity = new Vector2(0, -9.8f);
-        this.world = new World(gravity, true);
+    public GameModel(Player player, Vector2 gravity, World world, String screenName) {
+        this.gravity = gravity;
+        this.world = world;
         this.gameOver = false;
         this.score = 0;
 
         // Set up contact listener
         this.world.setContactListener(new Contact());
-
         // Initialize the world creator
-        this.worldCreator = new WorldCreator(world);
+        this.worldCreator = new WorldCreator(world, screenName);
 
         // Initialize the player
-        this.player = new Player(world, 5, 2);
-
-        // Add multiple bosses with different positions and sizes
-        bosses.add(new Boss(world, 12.45f, 3.75f, 0.5f, 0.5f));
-        bosses.add(new Boss(world, 11.50f, 3.75f, 0.5f, 0.5f));
-        bosses.add(new Boss(world, 11.75f, 1.85f, 1.0f, 1.0f));
+        this.player = player;
+        
+        // Initialize bosses based on screen
+        switch (screenName) {
+            case "Screen1":
+                // Add multiple bosses with different positions and sizes
+                bosses.add(new Boss(world, 12.45f, 3.75f, 0.5f, 0.5f));
+                bosses.add(new Boss(world, 11.50f, 3.75f, 0.5f, 0.5f));
+                bosses.add(new Boss(world, 11.75f, 1.85f, 1.0f, 1.0f));
+                break;
+            case "Screen2":
+                // Add bosses for Screen2
+                bosses.add(new Boss(world, 10.0f, 3.75f, 0.5f, 0.5f));
+                bosses.add(new Boss(world, 9.0f, 3.75f, 0.5f, 0.5f));
+                bosses.add(new Boss(world, 9.25f, 1.85f, 1.0f, 1.0f));
+                break;
+            case "Screen3":
+                // Add bosses for Screen3
+                bosses.add(new Boss(world, 8.0f, 3.75f, 0.5f, 0.5f));
+                bosses.add(new Boss(world, 7.0f, 3.75f, 0.5f, 0.5f));
+                bosses.add(new Boss(world, 7.25f, 1.85f, 1.0f, 1.0f));
+                break;
+            default:
+                // No bosses for other screens
+                break;
+        }
     }
 
     public void update(float delta) {
         if (player != null && !gameOver) {
             // 1. Physics step
             world.step(1/60f, 6, 2);
-
             // 2. Update entities
             player.update(delta);
 
