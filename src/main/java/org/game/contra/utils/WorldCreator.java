@@ -14,6 +14,19 @@ public class WorldCreator {
             createPlatform(world, 2.8f, 0.25f, 9.9f, 0.5f, true);
             createPlatform(world, 4.2f, 2.25f, 3.8f, 0.5f, false);
             createPlatform(world, 4.2f, 3.25f, 3.8f, 0.5f, false);
+                break;
+            case "Screen2":
+            // Create ground
+            createPlatform(world, 3f, 1.25f, 12.85f, 0.5f, true);
+                break;
+            case "Screen3":
+            // Create ground
+            createPlatform(world, 2.8f, 0.25f, 9.9f, 0.5f, true);
+            createPlatform(world, 4.2f, 2.25f, 3.8f, 0.5f, false);
+            createPlatform(world, 4.2f, 3.25f, 3.8f, 0.5f, false);
+                break;
+            default:
+                break;
         }
     }
 

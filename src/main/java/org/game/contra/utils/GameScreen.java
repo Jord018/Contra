@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import org.game.contra.RunGunGame;
 import org.game.contra.screens.Screen1;
+import org.game.contra.screens.Screen2;
 
 public class GameScreen implements Screen {
     private final RunGunGame game;
@@ -16,7 +17,6 @@ public class GameScreen implements Screen {
 
     public GameScreen(RunGunGame game) {
         this.game = game;
-        // เริ่มต้นด้วย Stage1Screen
         setScreen(new Screen1(game));
     }
 

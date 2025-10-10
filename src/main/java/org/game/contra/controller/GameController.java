@@ -93,21 +93,27 @@ public class GameController {
             }
         }
 
-        if (!aliveBosses.isEmpty() && aliveBosses.size() > 1) { // Need at least 2 bosses for sequencing
-            // Sequential boss selection (excluding index 0)
+        if (!aliveBosses.isEmpty()) {
+            // Select boss based on current index (with bounds checking)
+            if (currentBossIndex >= aliveBosses.size()) {
+                currentBossIndex = 0; // Reset to first boss if index is out of bounds
+            }
+            
             Boss selectedBoss = aliveBosses.get(currentBossIndex);
 
             // Update boss and make it shoot
             selectedBoss.update(Gdx.graphics.getDeltaTime());
             selectedBoss.shoot();
 
-            // Move to next boss in sequence (0 -> 1 -> 0 -> 1 -> ...)
-            currentBossIndex = 1 - currentBossIndex; // Toggle between 0 and 1
+            // Move to next boss in sequence (cycle through all bosses)
+            if (aliveBosses.size() > 1) {
+                currentBossIndex = (currentBossIndex + 1) % aliveBosses.size();
+            }
 
             // Reset cooldown for next shot
             bossShootCooldown = BOSS_SHOOT_INTERVAL;
 
-            Gdx.app.log("BossController", "Boss " + (currentBossIndex - 1) + " shooting, next shot in " + BOSS_SHOOT_INTERVAL + " seconds");
+            Gdx.app.log("BossController", "Boss " + currentBossIndex + " shooting, next shot in " + BOSS_SHOOT_INTERVAL + " seconds");
         }
     }
 

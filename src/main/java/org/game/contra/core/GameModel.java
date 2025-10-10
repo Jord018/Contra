@@ -21,6 +21,7 @@ public class GameModel {
     private Vector2 gravity;
     private boolean gameOver;
     private int score;
+
     public GameModel(Player player, Vector2 gravity, World world, String screenName) {
         this.gravity = gravity;
         this.world = world;
@@ -39,21 +40,17 @@ public class GameModel {
         switch (screenName) {
             case "Screen1":
                 // Add multiple bosses with different positions and sizes
-                bosses.add(new Boss(world, 12.45f, 3.75f, 0.5f, 0.5f));
-                bosses.add(new Boss(world, 11.50f, 3.75f, 0.5f, 0.5f));
-                bosses.add(new Boss(world, 11.75f, 1.85f, 1.0f, 1.0f));
+                bosses.add(new Boss(world, 12.45f, 3.75f, 0.5f, 0.5f,"Bullet/Bullet.png",new org.game.contra.entities.Shooting.StraightShoot()));
+                bosses.add(new Boss(world, 11.50f, 3.75f, 0.5f, 0.5f,"Bullet/Bullet.png",new org.game.contra.entities.Shooting.StraightShoot()));
+                bosses.add(new Boss(world, 11.75f, 1.85f, 1.0f, 1.0f,"Bullet/Bullet.png",new org.game.contra.entities.Shooting.StraightShoot()));
                 break;
             case "Screen2":
                 // Add bosses for Screen2
-                bosses.add(new Boss(world, 10.0f, 3.75f, 0.5f, 0.5f));
-                bosses.add(new Boss(world, 9.0f, 3.75f, 0.5f, 0.5f));
-                bosses.add(new Boss(world, 9.25f, 1.85f, 1.0f, 1.0f));
+                bosses.add(new Boss(world, 9.0f, 5.5f, 3.75f, 5.5f,"Bullet/Boss.png",new org.game.contra.entities.Shooting.AimedShoot(player)));
                 break;
             case "Screen3":
                 // Add bosses for Screen3
-                bosses.add(new Boss(world, 8.0f, 3.75f, 0.5f, 0.5f));
-                bosses.add(new Boss(world, 7.0f, 3.75f, 0.5f, 0.5f));
-                bosses.add(new Boss(world, 7.25f, 1.85f, 1.0f, 1.0f));
+
                 break;
             default:
                 // No bosses for other screens

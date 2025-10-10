@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import org.game.contra.RunGunGame;
+import org.game.contra.entities.Shooting.ShootingStrategy;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -17,6 +18,11 @@ public class Boss {
     private Vector2 position;
 
     private float width; // 1 meter wide
+
+    public float getHeight() {
+        return height;
+    }
+
     private float height; // 1.8 meters tall (average human height)
 
     private ArrayList<Bullet> bullets;
@@ -27,6 +33,8 @@ public class Boss {
     private float Healt = 100;
     private boolean Dead;
     private World world;
+    private ShootingStrategy shootingStrategy;
+
 
 
     private void createBody(World world) {
@@ -78,16 +86,16 @@ public class Boss {
 
     private com.badlogic.gdx.graphics.glutils.ShapeRenderer shapeRenderer;
 
-    public Boss(World world, float x, float y,float width,float height) {
+    public Boss(World world, float x, float y,float width,float height,String texturePath, ShootingStrategy strategy) {
         position = new Vector2(x, y);
         this.world = world;
         this.width = width;
         this.height = height;
+        this.shootingStrategy = strategy;
         this.shapeRenderer = new com.badlogic.gdx.graphics.glutils.ShapeRenderer();
         // Try loading the bullet texture
         try {
             // Make sure the path is correct and the file exists
-            String texturePath = "Bullet/Bullet.png";
             if (Gdx.files.internal(texturePath).exists()) {
                 this.bulletTexture = new Texture(Gdx.files.internal(texturePath));
                 Gdx.app.log("Player", "Successfully loaded bullet texture from: " + texturePath);
@@ -118,34 +126,11 @@ public class Boss {
         shapeRenderer.end();
     }
     public void shoot() {
-        if (shootTimer > 0) {
-            Gdx.app.log("Boss", "Shoot on cooldown: " + shootTimer);
-            return; // Still in cooldown
-        }
+        if (shootTimer > 0) {return;} // Still in cooldown
 
-        Gdx.app.log("Boss", "Shooting bullet!");
-        float speed = MathUtils.random(5, 10);
-
-        // Create bullet with zero velocity initially
-        Bullet bullet = new Bullet(Vector2.Zero, 10, speed, bulletTexture);
-
-        // Set bullet position at boss's position
-        Vector2 bulletPos = new Vector2(position.x-0.15f, position.y + height/2);
-        bullet.setPosition(bulletPos);
-
-        // Set direction to left (negative x direction)
-        bullet.setDirection(new Vector2(-10f, 37f));
-
-        // Add bullet to the world
-        if (world != null) {
-            bullet.createBody(world);
-            bullets.add(bullet);
-            shootTimer = shootCooldown; // Reset cooldown timer
-
-            Gdx.app.log("Boss", "Bullet created at: " + bulletPos +
-                              ", Total bullets: " + bullets.size());
-        } else {
-            Gdx.app.error("Boss", "World is null, cannot create bullet!");
+        if (shootingStrategy != null && world != null) {
+            shootingStrategy.shoot(this, world, bulletTexture, bullets);
+            shootTimer = shootCooldown;
         }
     }
 
