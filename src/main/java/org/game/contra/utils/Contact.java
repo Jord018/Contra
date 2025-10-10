@@ -27,26 +27,42 @@ public class Contact implements ContactListener{
             handleFootContact(fixtureB, fixtureA, contact);
         }
 
-        // Mark bullets for destruction instead of destroying them immediately
+        // Handle bullet collisions based on owner
         if (dataA instanceof Bullet) {
-            if (dataB instanceof Boss) {
-                Boss boss = (Boss) dataB;
-                ((Bullet) dataA).markForDestruction();
-                boss.takeDamage(25);
-            } else if ("ground".equals(dataB)) {
-                ((Bullet) dataA).markForDestruction();
-            }
+            Bullet bullet = (Bullet) dataA;
+            handleBulletCollision(bullet, dataB);
         } else if (dataB instanceof Bullet) {
-            if (dataA instanceof Boss) {
-                Boss boss = (Boss) dataA;
-                ((Bullet) dataB).markForDestruction();
-                boss.takeDamage(25);
-            } else if ("ground".equals(dataA)) {
-                ((Bullet) dataB).markForDestruction();
-            }
+            Bullet bullet = (Bullet) dataB;
+            handleBulletCollision(bullet, dataA);
         }
     }
 
+
+    private void handleBulletCollision(Bullet bullet, Object otherData) {
+        if (bullet.isFromPlayer()) {
+            // Player bullet hits boss
+            if (otherData instanceof Boss) {
+                Boss boss = (Boss) otherData;
+                bullet.markForDestruction();
+                boss.takeDamage(25);
+                Gdx.app.log("Contact", "Player bullet hit boss!");
+            } else if ("ground".equals(otherData)) {
+                bullet.markForDestruction();
+                Gdx.app.log("Contact", "Player bullet hit ground!");
+            }
+        } else if (bullet.isFromBoss()) {
+            // Boss bullet hits player
+            if (otherData instanceof Player) {
+                Player player = (Player) otherData;
+                bullet.markForDestruction();
+                // Add player damage logic here if needed
+                Gdx.app.log("Contact", "Boss bullet hit player!");
+            } else if ("ground".equals(otherData)) {
+                bullet.markForDestruction();
+                Gdx.app.log("Contact", "Boss bullet hit ground!");
+            }
+        }
+    }
 
     private void handleFootContact(Fixture footFixture, Fixture otherFixture, com.badlogic.gdx.physics.box2d.Contact contact) {
         // Get the player object from the foot fixture's body

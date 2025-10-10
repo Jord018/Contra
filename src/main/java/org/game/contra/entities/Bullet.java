@@ -8,6 +8,11 @@ import com.badlogic.gdx.physics.box2d.*;
 import org.game.contra.RunGunGame;
 
 public class Bullet {
+    public enum BulletOwner {
+        PLAYER,
+        BOSS
+    }
+    
     private float Damage;
     private boolean Active = true;
     private float Speed;
@@ -20,8 +25,9 @@ public class Bullet {
     private float rotation;   // มุมหมุน (degree)
     private boolean shouldBeDestroyed = false;
     private ShapeRenderer shapeRenderer;
+    private BulletOwner owner;
 
-    public Bullet(Vector2 velocity,float damage, float speed, Texture texture) {
+    public Bullet(Vector2 velocity,float damage, float speed, Texture texture, BulletOwner owner) {
         this.Damage = damage;
         this.Speed = speed;
         this.texture = texture;
@@ -30,6 +36,7 @@ public class Bullet {
         this.position = new Vector2();
         this.rotation = 0f;
         this.shapeRenderer = new ShapeRenderer();
+        this.owner = owner;
     }
 
     public Body getBody() {
@@ -53,8 +60,16 @@ public class Bullet {
         FixtureDef fdef = new FixtureDef();
         fdef.shape = shape;
         fdef.isSensor = true;
-        fdef.filter.categoryBits = RunGunGame.BULLET_BIT;
-        fdef.filter.maskBits = RunGunGame.ENEMY_BIT | RunGunGame.GROUND_BIT;
+        
+        // Set collision bits based on bullet owner
+        if (owner == BulletOwner.PLAYER) {
+            fdef.filter.categoryBits = RunGunGame.BULLET_BIT;
+            fdef.filter.maskBits = RunGunGame.ENEMY_BIT | RunGunGame.GROUND_BIT;
+        } else if (owner == BulletOwner.BOSS) {
+            fdef.filter.categoryBits = RunGunGame.ENEMY_BULLET_BIT;
+            fdef.filter.maskBits = RunGunGame.PLAYER_BIT | RunGunGame.GROUND_BIT;
+        }
+        
         body.createFixture(fdef).setUserData(this);
         shape.dispose();
 
@@ -130,6 +145,18 @@ public class Bullet {
 
     public boolean shouldBeDestroyed() {
         return shouldBeDestroyed;
+    }
+    
+    public BulletOwner getOwner() {
+        return owner;
+    }
+    
+    public boolean isFromPlayer() {
+        return owner == BulletOwner.PLAYER;
+    }
+    
+    public boolean isFromBoss() {
+        return owner == BulletOwner.BOSS;
     }
 
 }

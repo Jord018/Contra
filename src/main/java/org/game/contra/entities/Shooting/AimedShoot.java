@@ -6,6 +6,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.graphics.Texture;
 import org.game.contra.entities.Boss;
 import org.game.contra.entities.Bullet;
+import org.game.contra.entities.Bullet.BulletOwner;
 import org.game.contra.entities.Player;
 import org.game.contra.entities.Shooting.ShootingStrategy;
 
@@ -28,7 +29,7 @@ public class AimedShoot implements ShootingStrategy {
 
         Gdx.app.log("Boss", "Aimed shoot towards player!");
 
-        Bullet bullet = new Bullet(Vector2.Zero, 12, 10f, bulletTexture);
+        Bullet bullet = new Bullet(Vector2.Zero, 12, 10f, bulletTexture, BulletOwner.BOSS);
         bullet.setPosition(bossPos);
         bullet.setDirection(dir);
         bullet.createBody(world);

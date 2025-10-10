@@ -94,28 +94,29 @@ public class GameController {
         }
 
         if (!aliveBosses.isEmpty()) {
-            // Select boss based on current index (with bounds checking)
-            if (currentBossIndex >= aliveBosses.size()) {
-                currentBossIndex = 0; // Reset to first boss if index is out of bounds
+            // จำกัดให้เลือกเฉพาะ boss 2 ตัวแรก (index 0 และ 1)
+            int maxIndex = Math.min(aliveBosses.size(), 2); // ถ้ามีแค่ 1 ตัวก็ใช้ 1
+            if (currentBossIndex >= maxIndex) {
+                currentBossIndex = 0; // reset กลับไปตัวแรก
             }
-            
+
             Boss selectedBoss = aliveBosses.get(currentBossIndex);
 
-            // Update boss and make it shoot
+            // Update และสั่งให้ยิง
             selectedBoss.update(Gdx.graphics.getDeltaTime());
             selectedBoss.shoot();
 
-            // Move to next boss in sequence (cycle through all bosses)
-            if (aliveBosses.size() > 1) {
-                currentBossIndex = (currentBossIndex + 1) % aliveBosses.size();
-            }
+            // สลับไปอีกตัวใน 2 ตัวแรกเท่านั้น
+            currentBossIndex = (currentBossIndex + 1) % maxIndex;
 
-            // Reset cooldown for next shot
+            // Reset cooldown สำหรับรอบต่อไป
             bossShootCooldown = BOSS_SHOOT_INTERVAL;
 
-            Gdx.app.log("BossController", "Boss " + currentBossIndex + " shooting, next shot in " + BOSS_SHOOT_INTERVAL + " seconds");
+            Gdx.app.log("BossController",
+                    "Boss " + currentBossIndex + " shooting (limited to first two bosses), next shot in " + BOSS_SHOOT_INTERVAL + " seconds");
         }
     }
+
 
     public void resize(int width, int height) {
         view.resize(width, height);

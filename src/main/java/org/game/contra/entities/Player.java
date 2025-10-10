@@ -200,7 +200,8 @@ public class Player {
                 10,
                 30,
                 // speed
-                bulletTexture);
+                bulletTexture,
+                Bullet.BulletOwner.PLAYER);
 
         bullet.setPosition(new Vector2(position.x + width/2, position.y + height/2));
         bullet.setDirection(direction);
