@@ -56,7 +56,7 @@ public class Player {
         FixtureDef fdef = new FixtureDef();
         fdef.shape = shape;
         fdef.filter.categoryBits = RunGunGame.PLAYER_BIT;
-        fdef.filter.maskBits = RunGunGame.GROUND_BIT | RunGunGame.OBJECT_BIT| RunGunGame.PLATFORM_BIT;
+        fdef.filter.maskBits = RunGunGame.GROUND_BIT | RunGunGame.OBJECT_BIT| RunGunGame.PLATFORM_BIT| RunGunGame.ENEMY_BULLET_BIT;
         body.createFixture(fdef).setUserData("body");
 
         // Foot sensor

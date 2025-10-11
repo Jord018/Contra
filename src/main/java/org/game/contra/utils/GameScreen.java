@@ -1,6 +1,7 @@
 package org.game.contra.utils;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import org.game.contra.RunGunGame;
 import org.game.contra.screens.Screen1;
@@ -42,6 +43,11 @@ public class GameScreen implements Screen {
     @Override
     public void render(float delta) {
         if (currentScreen != null) currentScreen.render(delta);
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
+            setScreen(new Screen2(game)); // ไปยัง Screen2
+        }if (Gdx.input.isKeyJustPressed(Input.Keys.BACKSPACE)) {
+            setScreen(new Screen1(game)); // ไปยัง Screen2
+        }
     }
 
     @Override

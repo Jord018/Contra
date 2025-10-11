@@ -17,7 +17,8 @@ public class Contact implements ContactListener{
 
         Object dataA = fixtureA.getUserData();
         Object dataB = fixtureB.getUserData();
-
+        Object bodyAData = fixtureA.getBody().getUserData();
+        Object bodyBData = fixtureB.getBody().getUserData();
         // [Keep your existing debug logging...]
 
         // Handle foot sensor
@@ -30,10 +31,10 @@ public class Contact implements ContactListener{
         // Handle bullet collisions based on owner
         if (dataA instanceof Bullet) {
             Bullet bullet = (Bullet) dataA;
-            handleBulletCollision(bullet, dataB);
+            handleBulletCollision(bullet, bodyBData);
         } else if (dataB instanceof Bullet) {
             Bullet bullet = (Bullet) dataB;
-            handleBulletCollision(bullet, dataA);
+            handleBulletCollision(bullet, bodyAData );
         }
     }
 
@@ -56,6 +57,7 @@ public class Contact implements ContactListener{
                 Player player = (Player) otherData;
                 bullet.markForDestruction();
                 // Add player damage logic here if needed
+
                 Gdx.app.log("Contact", "Boss bullet hit player!");
             } else if ("ground".equals(otherData)) {
                 bullet.markForDestruction();
