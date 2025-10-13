@@ -10,6 +10,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import org.game.contra.RunGunGame;
+import org.game.contra.entities.Weapons.WeaponType;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -29,6 +30,20 @@ public class Player {
     private float shootTimer = 0;
     public boolean onGround;
     private boolean isFallingThrough = false;
+
+    public void setWeaponType(WeaponType currentWeapon) {
+        this.currentWeapon = currentWeapon;
+    }
+
+    public static WeaponType currentWeapon = WeaponType.NORMAL;
+
+    public void setAlive(boolean alive) {
+        Alive = alive;
+    }
+
+    private boolean Alive = true;
+
+    private int Healt = 3;
     private World world;
     boolean Dead;
 
@@ -38,7 +53,12 @@ public class Player {
 
     private ArrayList<Bullet> bulletsToAdd = new ArrayList<>();
     private ArrayList<Bullet> bulletsToRemove = new ArrayList<>();
-
+    private boolean needsRespawn = false;
+    private int rapidStacks = 0; // rapid powerup stacks (0..3)
+    private final int MAX_RAPID_STACKS = 3;
+    private final float RAPID_MULTIPLIER = 0.8f; // แต่ละ stack ลด cooldown คูณด้วย 0.8
+    private boolean invincible = false;
+    private float invincibleTimer = 0f;
 
 
 
@@ -56,7 +76,7 @@ public class Player {
         FixtureDef fdef = new FixtureDef();
         fdef.shape = shape;
         fdef.filter.categoryBits = RunGunGame.PLAYER_BIT;
-        fdef.filter.maskBits = RunGunGame.GROUND_BIT | RunGunGame.OBJECT_BIT| RunGunGame.PLATFORM_BIT| RunGunGame.ENEMY_BULLET_BIT;
+        fdef.filter.maskBits = RunGunGame.GROUND_BIT | RunGunGame.OBJECT_BIT| RunGunGame.PLATFORM_BIT| RunGunGame.ENEMY_BULLET_BIT | RunGunGame.ITEM_BIT;
         body.createFixture(fdef).setUserData("body");
 
         // Foot sensor
@@ -71,11 +91,16 @@ public class Player {
     public Body getBody() {
         return body;
     }
-    public Vector2 getPosfoot() {
-        return body.getFixtureList().get(0).getBody().getPosition();
+    public void increaseFireRate() {
+        if (rapidStacks < MAX_RAPID_STACKS) rapidStacks++;
     }
 
+    public void setInvincible(boolean val, float durationSeconds) {
+        this.invincible = val;
+        this.invincibleTimer = durationSeconds;
+    }
     public void update(float delta) {
+        if (body == null) return;
         // Update position
         position.set(body.getPosition().x - width/2, body.getPosition().y - height/2);
 
@@ -83,7 +108,7 @@ public class Player {
         if (jumpTimer > 0) {
             jumpTimer -= delta;
         }
-        
+
         // Update shoot timer
         if (shootTimer > 0) {
             shootTimer -= delta;
@@ -105,6 +130,7 @@ public class Player {
             System.out.println("Player landed (velocity-based detection)");
             jumpTimer = jumpCooldown; // Small cooldown after landing
         }
+
     }
 
     private com.badlogic.gdx.graphics.glutils.ShapeRenderer shapeRenderer;
@@ -211,13 +237,46 @@ public class Player {
         System.out.println("Shooting! Bullet at " + bullet.getPosition() + " toward " + direction);
     }
 
+    public void takeDamage(int damage) {
+        Healt -= damage;
+
+        if (Healt > 0) {
+            System.out.println("Player died!");
+            needsRespawn = true; // Mark for respawn instead of immediate respawn
+        }
+        else{
+            needsRespawn = false;
+        }
+    }
+    public void respawn() {
+        // กำหนดตำแหน่งเริ่มต้นใหม่
+        position.set(5, 2); // ตัวอย่างตำแหน่ง spawn ใหม่
+
+        Alive = true;
+        isJumping = false;
+        onGround = false;
+
+        // ลบ body เดิมถ้ามี
+        if (body != null) {
+            body.getWorld().destroyBody(body);
+            body = null;
+        }
+
+        // สร้าง body ใหม่
+        createBody(world);
+        needsRespawn = false;
+        System.out.println("Player respawned at " + position);
+    }
+
+    public boolean needsRespawn() {
+        return needsRespawn;
+    }
+
     public Vector2 getPosition() {
         return position;
     }
 
-    public void setJumping(boolean jumping) {
-        isJumping = jumping;
-    }
+
 
     public void dispose() {
         shapeRenderer.dispose();
@@ -238,8 +297,24 @@ public class Player {
     public ArrayList<Bullet> getBullets() {
         return bullets;
     }
-
-    public boolean isAlive() {
-        return !Dead;
+    public int getHealt() {
+        return Healt;
     }
+    public boolean isAlive() {
+        if (Healt <= 0) {
+            Healt = 0;
+            Alive = false;
+        } else {
+            Alive = true;
+        }
+        return Alive;
+    }
+
+    public void destroy() {
+        if (body != null) {
+            body.getWorld().destroyBody(body);
+            body = null;
+        }
+    }
+
 }

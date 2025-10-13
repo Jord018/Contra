@@ -33,7 +33,9 @@ public class GameController {
     private void handleInput() {
         Player player = model.getPlayer();
         boolean anyKeyPressed = false;
-        
+        if (player == null || player.getBody() == null) {
+            return;
+        }
         // Reset velocity
         player.getBody().setLinearVelocity(0, player.getBody().getLinearVelocity().y);
         

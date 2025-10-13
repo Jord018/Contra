@@ -19,6 +19,8 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import org.game.contra.RunGunGame;
 import org.game.contra.entities.Boss;
 import org.game.contra.entities.Bullet;
+import org.game.contra.entities.Items.AbstractItem;
+import org.game.contra.entities.Items.Items;
 
 
 public class GameView implements Disposable {
@@ -116,23 +118,46 @@ public class GameView implements Disposable {
             }
             batch.end();
             
+            // Draw items
+            batch.begin();
+            for (Items item : model.getItems()) {
+                if (item instanceof AbstractItem) {
+                    AbstractItem abstractItem = (AbstractItem) item;
+                    if (!abstractItem.shouldBeDestroyed() && abstractItem.getBody() != null) {
+                        Vector2 pos = abstractItem.getBody().getPosition();
+                        Texture texture = abstractItem.getTexture();
+                        if (texture != null) {
+                            batch.draw(texture, 
+                                pos.x - 0.25f, pos.y - 0.25f,  // Center the item
+                                0.5f, 0.5f);  // Item size (0.5x0.5 meters)
+                        }
+                    }
+                }
+            }
+            batch.end();
+            
             // Debug info
             if (!model.getBosses().isEmpty()) {
                 Boss firstBoss = model.getBosses().get(0);
+                /*
                 Gdx.app.log("Boss", "Position: " + firstBoss.getPosition() + 
                                   ", Alive: " + firstBoss.isAlive() + 
                                   ", Bullets: " + firstBoss.getBullets().size());
+
+                 */
             }
         }
         //debug render
         if (debug) {
             debugRenderer.render(model.getWorld(), viewport.getCamera().combined);
-            // Debug position output
+            /* Debug position output
             Vector2 playerPos = model.getPlayer().getBody().getPosition();
             Vector3 camPos = viewport.getCamera().position;
 
             //Gdx.app.log("Player Position", String.format("X: %.2f, Y: %.2f", playerPos.x, playerPos.y));
             //System.out.println(model.getPlayer().getPosfoot());
+
+             */
         }
     }
 

@@ -34,6 +34,7 @@ public class Boss {
     private boolean Dead;
     private World world;
     private ShootingStrategy shootingStrategy;
+    private boolean needsDestruction = false;
 
 
 
@@ -80,7 +81,7 @@ public class Boss {
         }
 
         if (Dead) {
-            destroy();
+            needsDestruction = true; // Mark for destruction instead of immediate destroy
         }
     }
 
@@ -154,6 +155,7 @@ public class Boss {
         if (Healt <= 0) {
             Healt = 0;
             Dead = true;
+            needsDestruction = true; // Mark for destruction
         }
     }
 
@@ -169,5 +171,10 @@ public class Boss {
             body.getWorld().destroyBody(body);
             body = null;
         }
+        needsDestruction = false;
+    }
+
+    public boolean needsDestruction() {
+        return needsDestruction;
     }
 }

@@ -20,6 +20,7 @@ public class RunGunGame extends Game {
     public static final short ENEMY_BIT = 16;
     public static final short ENEMY_BULLET_BIT = 32;
     public static final short BULLET_BIT = 64;
+    public static final short ITEM_BIT = 128;
     
     public SpriteBatch batch;
     

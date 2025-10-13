@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import org.game.contra.entities.Boss;
 import org.game.contra.entities.Bullet;
+import org.game.contra.entities.Items.Items;
 import org.game.contra.entities.Player;
 
 public class Contact implements ContactListener{
@@ -36,6 +37,23 @@ public class Contact implements ContactListener{
             Bullet bullet = (Bullet) dataB;
             handleBulletCollision(bullet, bodyAData );
         }
+
+        if (dataA instanceof Items) {
+            Items item = (Items) dataA;
+            if (bodyBData instanceof Player) {
+                Player player = (Player) bodyBData;
+                item.applyEffect(player);
+                item.markForDestruction();
+            }
+        } else if (dataB instanceof Items) {
+            Items item = (Items) dataB;
+            if (bodyAData instanceof Player) {
+                Player player = (Player) bodyAData;
+                item.applyEffect(player);
+                item.markForDestruction();
+            }
+        }
+
     }
 
 
@@ -56,9 +74,11 @@ public class Contact implements ContactListener{
             if (otherData instanceof Player) {
                 Player player = (Player) otherData;
                 bullet.markForDestruction();
+                player.takeDamage(1);
                 // Add player damage logic here if needed
 
                 Gdx.app.log("Contact", "Boss bullet hit player!");
+                Gdx.app.log("Contact", "Heal"+ " " + player.getHealt());
             } else if ("ground".equals(otherData)) {
                 bullet.markForDestruction();
                 Gdx.app.log("Contact", "Boss bullet hit ground!");
