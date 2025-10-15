@@ -1,14 +1,11 @@
 package org.game.contra.entities.Shooting;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.graphics.Texture;
+import org.jbox2d.common.Vec2;
+import org.jbox2d.dynamics.World;
 import org.game.contra.entities.Boss;
 import org.game.contra.entities.Bullet;
 import org.game.contra.entities.Bullet.BulletOwner;
 import org.game.contra.entities.Player;
-import org.game.contra.entities.Shooting.ShootingStrategy;
 
 import java.util.List;
 
@@ -20,18 +17,16 @@ public class AimedShoot implements ShootingStrategy {
     }
 
     @Override
-    public void shoot(Boss boss, World world, Texture bulletTexture, List<Bullet> bullets) {
+    public void shoot(Boss boss, World world, List<Bullet> bullets) {
         if (target == null) return;
 
-        Vector2 bossPos = new Vector2(boss.getPosition().x, boss.getPosition().y + boss.getHeight() / 2);
-        Vector2 dir = target.getPosition().cpy().sub(bossPos); // หาผู้เล่น
-        dir.nor();
+        Vec2 bossPos = new Vec2(boss.getPosition().x, boss.getPosition().y + boss.getHeight() / 2);
+        Vec2 targetPos = target.getPosition();
+        Vec2 dir = targetPos.sub(bossPos);
+        dir.normalize();
 
-        Gdx.app.log("Boss", "Aimed shoot towards player!");
-
-        Bullet bullet = new Bullet(Vector2.Zero, 12, 10f, bulletTexture, BulletOwner.BOSS);
+        Bullet bullet = new Bullet(dir, 12, 10f, BulletOwner.BOSS);
         bullet.setPosition(bossPos);
-        bullet.setDirection(dir);
         bullet.createBody(world);
         bullets.add(bullet);
     }

@@ -1,182 +1,48 @@
 package org.game.contra.core;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.physics.box2d.*;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Disposable;
-import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.StretchViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
-import org.game.contra.RunGunGame;
-import org.game.contra.entities.Boss;
-import org.game.contra.entities.Bullet;
-import org.game.contra.entities.Items.AbstractItem;
-import org.game.contra.entities.Items.Items;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
+import org.game.contra.entities.Player;
 
+import java.io.InputStream;
 
-public class GameView implements Disposable {
+public class GameView {
     private final GameModel model;
-    private final SpriteBatch batch;
-    private final ShapeRenderer shapeRenderer;
-    private Texture background;
-    private Box2DDebugRenderer debugRenderer;
-    private boolean debug = true; // Toggle debug rendering
+    private Image background;
 
-    public StretchViewport getViewport() {
-        return viewport;
-    }
-
-    private StretchViewport viewport;
-
-
-
-    public GameView(GameModel model,String path) {
+    public GameView(GameModel model, String imagePath) {
         this.model = model;
-        this.batch = new SpriteBatch();
-        this.shapeRenderer = new ShapeRenderer();
-        
-        // Create viewport with world units
-        this.viewport = new StretchViewport(RunGunGame.V_WIDTH, RunGunGame.V_HEIGHT);
-        
-        // Set camera position to center of the world
-        viewport.getCamera().position.set(RunGunGame.V_WIDTH/2f, RunGunGame.V_HEIGHT/2f, 0);
-        viewport.getCamera().update();
-        
-        // Load background image
         try {
-            background = new Texture(Gdx.files.internal(path));
-            background.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+            InputStream is = getClass().getClassLoader().getResourceAsStream(imagePath);
+            if (is == null) {
+                throw new IllegalArgumentException("File not found: " + imagePath);
+            }
+            background = new Image(is);
         } catch (Exception e) {
-            Gdx.app.error("GameView", "Could not load background image", e);
+            e.printStackTrace();
         }
-
-        // Initialize debug renderer
-        debugRenderer = new Box2DDebugRenderer();
     }
-    public void render() {
+
+    public void render(GraphicsContext gc) {
         // Clear the screen
-        Gdx.gl.glClearColor(0, 0, 0, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        gc.clearRect(0, 0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
 
-        // Update viewport and set projection matrix
-        viewport.apply();
-        batch.setProjectionMatrix(viewport.getCamera().combined);
-        
-        // Begin drawing
-        batch.begin();
-
-        // Draw background to fill the entire screen
+        // Draw background
         if (background != null) {
-            batch.draw(background,
-                0, 0,                        // x, y position
-                RunGunGame.V_WIDTH,          // width in world units
-                RunGunGame.V_HEIGHT,         // height in world units
-                0, 0,                       // srcX, srcY
-                background.getWidth(),       // srcWidth
-                background.getHeight(),      // srcHeight
-                false,                      // flipX
-                false);                     // flipY
+            gc.drawImage(background, 0, 0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
         }
-        batch.end();
-        // Draw game objects
-        if (model.getPlayer() != null) {
-            if (model.getPlayer().isAlive()) {
-                model.getPlayer().draw(batch);
-            }
 
-            // Draw all bosses and their bullets
-            for (Boss boss : model.getBosses()) {
-                if (boss.isAlive()) {
-                    boss.draw(batch);
-
-                    // Draw boss bullets
-                    batch.begin();
-                    for (Bullet bullet : boss.getBullets()) {
-                        if (bullet.isActive()) {
-                            bullet.render(batch);
-                        }
-                    }
-                    batch.end();
-                }
-            }
-
-            // Draw player bullets
-            batch.begin();
-            for (Bullet bullet : model.getPlayer().getBullets()) {
-                if (bullet.isActive()) {
-                    bullet.render(batch);
-                }
-            }
-            batch.end();
-            
-            // Draw items
-            batch.begin();
-            for (Items item : model.getItems()) {
-                if (item instanceof AbstractItem) {
-                    AbstractItem abstractItem = (AbstractItem) item;
-                    if (!abstractItem.shouldBeDestroyed() && abstractItem.getBody() != null) {
-                        Vector2 pos = abstractItem.getBody().getPosition();
-                        Texture texture = abstractItem.getTexture();
-                        if (texture != null) {
-                            batch.draw(texture, 
-                                pos.x - 0.25f, pos.y - 0.25f,  // Center the item
-                                0.5f, 0.5f);  // Item size (0.5x0.5 meters)
-                        }
-                    }
-                }
-            }
-            batch.end();
-            
-            // Debug info
-            if (!model.getBosses().isEmpty()) {
-                Boss firstBoss = model.getBosses().get(0);
-                /*
-                Gdx.app.log("Boss", "Position: " + firstBoss.getPosition() + 
-                                  ", Alive: " + firstBoss.isAlive() + 
-                                  ", Bullets: " + firstBoss.getBullets().size());
-
-                 */
-            }
+        // Draw player
+        Player player = model.getPlayer();
+        if (player != null && player.isAlive()) {
+            // This is a placeholder for player rendering.
+            // In a real game, you would draw a sprite here.
+            gc.setFill(Color.BLUE);
+            gc.fillRect(player.getBody().getPosition().x * 50, //
+                    gc.getCanvas().getHeight() - player.getBody().getPosition().y * 50, 20, 40);
         }
-        //debug render
-        if (debug) {
-            debugRenderer.render(model.getWorld(), viewport.getCamera().combined);
-            /* Debug position output
-            Vector2 playerPos = model.getPlayer().getBody().getPosition();
-            Vector3 camPos = viewport.getCamera().position;
 
-            //Gdx.app.log("Player Position", String.format("X: %.2f, Y: %.2f", playerPos.x, playerPos.y));
-            //System.out.println(model.getPlayer().getPosfoot());
-
-             */
-        }
+        // In a real game, you'd also render enemies, bullets, items, etc.
     }
-
-    public void resize(int width, int height) {
-        viewport.update(width, height, true);
-        viewport.getCamera().position.set(RunGunGame.V_WIDTH/2f, RunGunGame.V_HEIGHT/2f, 0);
-        viewport.getCamera().update();
-    }
-
-    @Override
-    public void dispose() {
-        batch.dispose();
-        shapeRenderer.dispose();
-        if (background != null) {
-            background.dispose();
-        }
-        if (debugRenderer != null) {
-            debugRenderer.dispose();
-        }
-    }
-
 }

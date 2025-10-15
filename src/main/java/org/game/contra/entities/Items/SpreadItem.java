@@ -6,7 +6,7 @@ import org.game.contra.entities.Weapons.WeaponType;
 public class SpreadItem extends AbstractItem {
 
     public SpreadItem() {
-        this.texture = new com.badlogic.gdx.graphics.Texture("Bullet/Bullet.png");
+        // Texture loading will be handled by the view
     }
 
     @Override

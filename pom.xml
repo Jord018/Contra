@@ -5,86 +5,61 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.game.contra</groupId>
-    <artifactId>mygdx-desktop</artifactId>
+    <groupId>org.game.contra</groupId>
+    <artifactId>javafx-rgr</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>MyGDX Desktop Only</name>
+    <name>JavaFX Run and Gun</name>
 
     <properties>
-        <gdx.version>1.13.1</gdx.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <javafx.version>21</javafx.version>
     </properties>
 
     <dependencies>
-        <!-- libGDX core -->
+        <!-- JavaFX -->
         <dependency>
-            <groupId>com.badlogicgames.gdx</groupId>
-            <artifactId>gdx</artifactId>
-            <version>${gdx.version}</version>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>${javafx.version}</version>
+            <classifier>linux</classifier>
         </dependency>
 
-        <!-- libGDX Box2D -->
+        <!-- JBox2D -->
         <dependency>
-            <groupId>com.badlogicgames.gdx</groupId>
-            <artifactId>gdx-box2d</artifactId>
-            <version>${gdx.version}</version>
-        </dependency>
-
-        <!-- Desktop Backend LWJGL3 -->
-        <dependency>
-            <groupId>com.badlogicgames.gdx</groupId>
-            <artifactId>gdx-backend-lwjgl3</artifactId>
-            <version>${gdx.version}</version>
-        </dependency>
-
-        <!-- Natives Desktop -->
-        <dependency>
-            <groupId>com.badlogicgames.gdx</groupId>
-            <artifactId>gdx-platform</artifactId>
-            <version>${gdx.version}</version>
-            <classifier>natives-desktop</classifier>
-        </dependency>
-
-        <!-- Box2D natives -->
-        <dependency>
-            <groupId>com.badlogicgames.gdx</groupId>
-            <artifactId>gdx-box2d-platform</artifactId>
-            <version>${gdx.version}</version>
-            <classifier>natives-desktop</classifier>
-        </dependency>
-
-        <!-- Ashley ECS -->
-        <dependency>
-            <groupId>com.badlogicgames.ashley</groupId>
-            <artifactId>ashley</artifactId>
-            <version>1.7.4</version>
-        </dependency>
-
-        <!-- gdx-ai -->
-        <dependency>
-            <groupId>com.badlogicgames.gdx</groupId>
-            <artifactId>gdx-ai</artifactId>
-            <version>1.8.2</version>
+            <groupId>org.jbox2d</groupId>
+            <artifactId>jbox2d-library</artifactId>
+            <version>2.2.1.1</version>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <!-- Compiler plugin สำหรับ JDK 21 -->
+            <!-- Compiler plugin for JDK 21 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.11.0</version>
                 <configuration>
-                    <source>21</source>
-                    <target>21</target>
-                    <release>21</release>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
                 </configuration>
             </plugin>
 
-            <!-- Shade plugin สำหรับสร้าง jar รันได้ -->
+            <!-- Shade plugin to create a runnable jar -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -92,16 +67,26 @@
                 <executions>
                     <execution>
                         <phase>package</phase>
-                        <goals><goal>shade</goal></goals>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
                         <configuration>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.game.contra.DesktopLauncher</mainClass>
+                                    <mainClass>org.game.contra.Main</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>0.0.8</version>
+                <configuration>
+                    <mainClass>org.game.contra/org.game.contra.Main</mainClass>
+                </configuration>
             </plugin>
         </plugins>
     </build>

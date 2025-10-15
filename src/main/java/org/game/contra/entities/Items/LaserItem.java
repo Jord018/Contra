@@ -6,7 +6,7 @@ import org.game.contra.entities.Weapons.WeaponType;
 public class LaserItem extends AbstractItem {
 
     public LaserItem() {
-        this.texture = new com.badlogic.gdx.graphics.Texture("items/laser.png");
+        // Texture loading will be handled by the view
     }
 
     @Override

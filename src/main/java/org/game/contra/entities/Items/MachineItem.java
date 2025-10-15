@@ -6,7 +6,7 @@ import org.game.contra.entities.Weapons.WeaponType;
 public class MachineItem extends AbstractItem {
 
     public MachineItem() {
-        this.texture = new com.badlogic.gdx.graphics.Texture("items/machine.png");
+        // Texture loading will be handled by the view
     }
 
     @Override

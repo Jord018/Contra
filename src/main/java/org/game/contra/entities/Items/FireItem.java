@@ -6,7 +6,7 @@ import org.game.contra.entities.Weapons.WeaponType;
 public class FireItem extends AbstractItem {
 
     public FireItem() {
-        this.texture = new com.badlogic.gdx.graphics.Texture("items/fire.png");
+        // Texture loading will be handled by the view
     }
 
     @Override

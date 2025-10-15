@@ -5,13 +5,13 @@ import org.game.contra.entities.Player;
 public class RapidItem extends AbstractItem {
 
     public RapidItem() {
-        this.texture = new com.badlogic.gdx.graphics.Texture("items/rapid.png");
+        // Texture loading will be handled by the view
     }
 
     @Override
     public void applyEffect(Player player) {
-        player.increaseFireRate();
-        System.out.println("Rapid Fire activated!");
+        // player.increaseFireRate();
+        System.out.println("Rapid Fire obtained!");
     }
 
     @Override
