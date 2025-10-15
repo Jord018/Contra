@@ -2,20 +2,14 @@ package org.game.contra.entities.Items;
 
 import org.game.contra.entities.Player;
 
-public class BarrierItem extends AbstractItem {
+public class BarrierItem extends BaseItem {
 
-    public BarrierItem() {
-        this.texture = new com.badlogic.gdx.graphics.Texture("items/barrier.png");
+    public BarrierItem(double x, double y, double width, double height) {
+        super(x, y, width, height);
     }
 
     @Override
-    public void applyEffect(Player player) {
-        player.setInvincible(true, 10f); // อมตะ 10 วิ
-        System.out.println("Barrier activated!");
-    }
-
-    @Override
-    public String getName() {
-        return "Barrier";
+    public void apply(Player player) {
+        // Apply barrier effect to the player
     }
 }

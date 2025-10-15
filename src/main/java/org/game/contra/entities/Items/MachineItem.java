@@ -1,22 +1,15 @@
 package org.game.contra.entities.Items;
 
 import org.game.contra.entities.Player;
-import org.game.contra.entities.Weapons.WeaponType;
 
-public class MachineItem extends AbstractItem {
+public class MachineItem extends BaseItem {
 
-    public MachineItem() {
-        this.texture = new com.badlogic.gdx.graphics.Texture("items/machine.png");
+    public MachineItem(double x, double y, double width, double height) {
+        super(x, y, width, height);
     }
 
     @Override
-    public void applyEffect(Player player) {
-        player.setWeaponType(WeaponType.MACHINE);
-        System.out.println("Machine Gun obtained!");
-    }
-
-    @Override
-    public String getName() {
-        return "Machine Gun";
+    public void apply(Player player) {
+        // Give the player the machine gun
     }
 }

@@ -1,22 +1,15 @@
 package org.game.contra.entities.Items;
 
 import org.game.contra.entities.Player;
-import org.game.contra.entities.Weapons.WeaponType;
 
-public class SpreadItem extends AbstractItem {
+public class SpreadItem extends BaseItem {
 
-    public SpreadItem() {
-        this.texture = new com.badlogic.gdx.graphics.Texture("Bullet/Bullet.png");
+    public SpreadItem(double x, double y, double width, double height) {
+        super(x, y, width, height);
     }
 
     @Override
-    public void applyEffect(Player player) {
-        player.setWeaponType(WeaponType.SPREAD);
-        System.out.println("Spread Gun obtained!");
-    }
-
-    @Override
-    public String getName() {
-        return "Spread Gun";
+    public void apply(Player player) {
+        // Give the player the spread gun
     }
 }

@@ -1,22 +1,15 @@
 package org.game.contra.entities.Items;
 
 import org.game.contra.entities.Player;
-import org.game.contra.entities.Weapons.WeaponType;
 
-public class LaserItem extends AbstractItem {
+public class LaserItem extends BaseItem {
 
-    public LaserItem() {
-        this.texture = new com.badlogic.gdx.graphics.Texture("items/laser.png");
+    public LaserItem(double x, double y, double width, double height) {
+        super(x, y, width, height);
     }
 
     @Override
-    public void applyEffect(Player player) {
-        player.setWeaponType(WeaponType.LASER);
-        System.out.println("Laser Gun obtained!");
-    }
-
-    @Override
-    public String getName() {
-        return "Laser Gun";
+    public void apply(Player player) {
+        // Give the player the laser gun
     }
 }
