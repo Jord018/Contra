@@ -8,11 +8,13 @@ public class Player {
     private Point2D position;
     private Point2D velocity;
     private final Rectangle2D bounds;
+    private boolean grounded;
 
     public Player(double x, double y) {
         this.position = new Point2D(x, y);
         this.velocity = new Point2D(0, 0);
         this.bounds = new Rectangle2D(x, y, 50, 50);
+        this.grounded = false;
     }
 
     public Point2D getPosition() {
@@ -33,5 +35,13 @@ public class Player {
 
     public Rectangle2D getBounds() {
         return new Rectangle2D(position.getX(), position.getY(), bounds.getWidth(), bounds.getHeight());
+    }
+
+    public boolean isGrounded() {
+        return grounded;
+    }
+
+    public void setGrounded(boolean grounded) {
+        this.grounded = grounded;
     }
 }

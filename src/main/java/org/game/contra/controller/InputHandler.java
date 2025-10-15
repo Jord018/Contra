@@ -23,7 +23,9 @@ public class InputHandler {
                 case W:
                 case UP:
                 case SPACE:
-                    player.setVelocity(new javafx.geometry.Point2D(player.getVelocity().getX(), -10));
+                    if (player.isGrounded()) {
+                        player.setVelocity(new javafx.geometry.Point2D(player.getVelocity().getX(), -10));
+                    }
                     break;
             }
         });

@@ -16,9 +16,12 @@ public class Physics {
         player.setPosition(new javafx.geometry.Point2D(player.getPosition().getX() + player.getVelocity().getX() * deltaTime, player.getPosition().getY() + player.getVelocity().getY() * deltaTime));
 
         // Check for collisions with platforms
+        player.setGrounded(false);
         for (Platform platform : platforms) {
             if (player.getBounds().intersects(platform.getBounds())) {
-                // Handle collision
+                player.setGrounded(true);
+                player.setVelocity(new javafx.geometry.Point2D(player.getVelocity().getX(), 0));
+                player.setPosition(new javafx.geometry.Point2D(player.getPosition().getX(), platform.getBounds().getMinY() - player.getBounds().getHeight()));
             }
         }
     }
